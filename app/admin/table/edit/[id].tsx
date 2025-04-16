@@ -1,5 +1,5 @@
 // app/edit/[id].tsx
-import { router } from "expo-router";
+import { useRouter } from "expo-router";
 import CreateOrEditTable from "@/components/tables/CreateOrEditTable";
 import { useLocalSearchParams } from "expo-router";
 import { View, Text, Alert, } from "react-native";
