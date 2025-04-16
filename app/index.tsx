@@ -6,7 +6,7 @@ export default function IndexScreen() {
   return (
     <SafeAreaProvider>
       <SafeAreaView>
-        <Link href="/admin/index" style={{ padding: 20 }}>
+        <Link href="/admin" style={{ padding: 20 }}>
           Go to Dashboard
         </Link>
       </SafeAreaView>
