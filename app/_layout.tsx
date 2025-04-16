@@ -17,12 +17,41 @@ import { AuthProvider } from "@/features/auth/context/AuthProvider";
 import { Provider } from "react-redux";
 import { persistor, store } from "@/store/store";
 import { PersistGate } from "redux-persist/integration/react";
+import { useAuth } from "@/features/auth/hooks/useAuth";
+import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+import { useUserRoles } from "@/features/auth/hooks/useUserRoles";
 
-// Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
-export default function RootLayout() {
+function MainApp() {
+  const { isAdmin } = useUserRoles();
   const colorScheme = useColorScheme();
+
+  return (
+    <SafeAreaProvider>
+      <SafeAreaView style={{ flex: 1 }} edges={["top", "left", "right"]}>
+        <GluestackUIProvider mode="light">
+          <ThemeProvider
+            value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
+          >
+            <Stack screenOptions={{ headerShown: false }}>
+              {/* {isAdmin ? (
+                <Stack.Screen name="admin" />
+              ) : (
+                <Stack.Screen name="user" />
+              )} */}
+              <Stack.Screen name="admin" />
+              <Stack.Screen name="+not-found" />
+            </Stack>
+            <StatusBar style="auto" />
+          </ThemeProvider>
+        </GluestackUIProvider>
+      </SafeAreaView>
+    </SafeAreaProvider>
+  );
+}
+
+export default function RootLayout() {
   const [loaded] = useFonts({
     SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
   });
@@ -41,18 +70,7 @@ export default function RootLayout() {
     <Provider store={store}>
       <PersistGate loading={null} persistor={persistor}>
         <AuthProvider>
-          <GluestackUIProvider mode="light">
-            <ThemeProvider
-              value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
-            >
-              <Stack>
-                <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-                <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-                <Stack.Screen name="+not-found" />
-              </Stack>
-              <StatusBar style="auto" />
-            </ThemeProvider>
-          </GluestackUIProvider>
+          <MainApp />
         </AuthProvider>
       </PersistGate>
     </Provider>

@@ -1,51 +1,112 @@
-import { RootState } from "@/store/store";
+import { BASE_URL } from "@/constants/constants";
+import {
+  GetMeResponse,
+  LoginResponse,
+  RefreshTokenResponse,
+  RegisterResponse,
+} from "../interfaces/auth.interface";
+import { LoginFormData, RegisterFormData } from "@/lib/validation/authSchema";
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { LoginResponse } from "../interfaces/auth.interface";
-import { LoginFormData } from "@/lib/validation/authSchema";
+import { RootState } from "@/store/store";
+import { setCredentials } from "../store/auth.slice";
+
+const baseQuery = fetchBaseQuery({
+  baseUrl: BASE_URL,
+  prepareHeaders: (headers, { getState }) => {
+    const token = (getState() as RootState).auth.access_token;
+    if (token) {
+      headers.set("Authorization", `Bearer ${token}`);
+    }
+    return headers;
+  },
+});
+
+const baseQueryWithReauth = async (args: any, api: any, extraOptions: any) => {
+  let result = await baseQuery(args, api, extraOptions);
+
+  if (result.error && result.error.status === 401) {
+    const refreshToken = (api.getState() as RootState).auth.refresh_token;
+    if (refreshToken) {
+      const refreshResult = await baseQuery(
+        {
+          url: "/auth/refresh-token",
+          method: "POST",
+          body: { refresh_token: refreshToken },
+        },
+        api,
+        extraOptions
+      );
+
+      if (refreshResult.data) {
+        // api.dispatch(
+        //   setCredentials({
+        //     access_token: (refreshResult.data as RefreshTokenResponse)
+        //       .access_token,
+        //     refresh_token: (refreshResult.data as RefreshTokenResponse)
+        //       .refresh_token,
+        //     user: (refreshResult.data as RefreshTokenResponse).user,
+        //     is_authenticated: true,
+        //   })
+        // );
+        result = await baseQuery(args, api, extraOptions);
+      }
+    }
+  }
+
+  return result;
+};
 
 export const authApi = createApi({
   reducerPath: "authApi",
-  baseQuery: fetchBaseQuery({
-    baseUrl: process.env.API_URL,
-    prepareHeaders: (headers, { getState }) => {
-      const token = (getState() as RootState).auth.access_token;
-      if (token) {
-        headers.set("Authorization", `Bearer ${token}`);
-      }
-      return headers;
-    },
-  }),
+  baseQuery: baseQueryWithReauth,
+  // tagTypes: ["Auth"],
   endpoints: (builder) => ({
-    login: builder.mutation({
-      query: (credentials: LoginFormData) => ({
+    login: builder.mutation<LoginResponse, LoginFormData>({
+      query: (body) => ({
         url: "auth/login",
         method: "POST",
-        body: credentials,
+        body,
       }),
       transformResponse: (response: LoginResponse) => {
-        return {
-          data: response.data,
-        };
+        return response;
       },
     }),
-    checkAuth: builder.query({
-      query: () => "auth/check",
-    }),
-    register: builder.mutation({
-      query: (userData) => ({
+    register: builder.mutation<RegisterResponse, RegisterFormData>({
+      query: (body) => ({
         url: "auth/register",
         method: "POST",
-        body: userData,
+        body,
       }),
+      transformResponse: (response: RegisterResponse) => {
+        return response;
+      },
     }),
-    getHello: builder.query({
+    getMe: builder.query<GetMeResponse, void>({
       query: () => ({
-        url: "/",
-        method: "GET",
+        url: "/auth/me",
+        method: "POST",
       }),
+      transformResponse: (response: { data: GetMeResponse }) => {
+        console.log("GetMe Response:", response.data);
+        return response.data;
+      },
+    }),
+    refreshToken: builder.mutation<RefreshTokenResponse, string>({
+      query: (refreshToken: string) => ({
+        url: "/auth/refresh-token",
+        method: "POST",
+        body: { refresh_token: refreshToken },
+      }),
+      transformResponse: (response: RefreshTokenResponse) => {
+        return response;
+      },
     }),
   }),
 });
 
-export const { useLoginMutation, useCheckAuthQuery, useRegisterMutation, useGetHelloQuery } =
-  authApi;
+export const {
+  useLoginMutation,
+  useRegisterMutation,
+  useGetMeQuery,
+  useRefreshTokenMutation,
+} = authApi;

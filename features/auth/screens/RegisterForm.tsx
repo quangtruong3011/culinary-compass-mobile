@@ -1,44 +1,35 @@
-import { LoginFormData, loginSchema } from "@/lib/validation/authSchema";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Controller, useForm } from "react-hook-form";
+import { Button, ButtonSpinner, ButtonText } from "@/components/ui/button";
+import { Divider } from "@/components/ui/divider";
 import {
   FormControl,
   FormControlHelper,
   FormControlHelperText,
   FormControlLabel,
   FormControlLabelText,
-} from "../../../components/ui/form-control";
-import { VStack } from "../../../components/ui/vstack";
-import {
-  Input,
-  InputField,
-} from "../../../components/ui/input";
-import { HStack } from "../../../components/ui/hstack";
-import {
-  Checkbox,
-  CheckboxIcon,
-  CheckboxIndicator,
-  CheckboxLabel,
-} from "../../../components/ui/checkbox";
-import { CheckIcon } from "../../../components/ui/icon";
+} from "@/components/ui/form-control";
+import { HStack } from "@/components/ui/hstack";
+import { Input, InputField, InputSlot } from "@/components/ui/input";
+import { VStack } from "@/components/ui/vstack";
+import { RegisterFormData, registerSchema } from "@/lib/validation/authSchema";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Link } from "expo-router";
-import { Divider } from "../../../components/ui/divider";
-import { Button, ButtonText } from "../../../components/ui/button";
+import { Controller, useForm } from "react-hook-form";
 import { Text } from "react-native";
+import colors from "tailwindcss/colors";
 
-export const LoginForm = ({
+export const RegisterForm = ({
   onSubmit,
   isLoading,
 }: {
-  onSubmit: (data: LoginFormData) => void;
+  onSubmit: (data: RegisterFormData) => void;
   isLoading: boolean;
 }) => {
   const {
     control,
     handleSubmit,
     formState: { errors },
-  } = useForm<LoginFormData>({
-    resolver: zodResolver(loginSchema),
+  } = useForm<RegisterFormData>({
+    resolver: zodResolver(registerSchema),
   });
 
   return (
@@ -59,9 +50,9 @@ export const LoginForm = ({
               <InputField
                 type="text"
                 placeholder="example@gmail.com"
-                onChangeText={onChange}
+                value={value}
                 onBlur={onBlur}
-                value={value || ""}
+                onChangeText={onChange}
               />
             </Input>
             <FormControlHelper>
@@ -90,10 +81,10 @@ export const LoginForm = ({
             <Input className="my-1">
               <InputField
                 type="password"
-                placeholder="******"
-                onChangeText={onChange}
+                placeholder="********"
+                value={value}
                 onBlur={onBlur}
-                value={value || ""}
+                onChangeText={onChange}
               />
             </Input>
             <FormControlHelper>
@@ -109,31 +100,50 @@ export const LoginForm = ({
         )}
       />
 
-      <HStack className="justify-between">
-        <Checkbox size="md" value="remember" isDisabled={isLoading}>
-          <CheckboxIndicator>
-            <CheckboxIcon as={CheckIcon} />
-          </CheckboxIndicator>
-          <CheckboxLabel>Remember me</CheckboxLabel>
-        </Checkbox>
-        <Link href="/(auth)/forgot-password" className="text-sm text-blue-500">
-          <Text>Forgot password?</Text>
-        </Link>
-      </HStack>
+      <Controller
+        name="confirmPassword"
+        control={control}
+        render={({ field: { onChange, onBlur, value } }) => (
+          <FormControl
+            isInvalid={!!errors.confirmPassword}
+            isRequired={true}
+            isDisabled={isLoading}
+          >
+            <FormControlLabel>
+              <FormControlLabelText>Confirm Password</FormControlLabelText>
+            </FormControlLabel>
+            <Input className="my-1">
+              <InputField
+                type="password"
+                placeholder="********"
+                value={value}
+                onBlur={onBlur}
+                onChangeText={onChange}
+              />
+            </Input>
+            <FormControlHelper>
+              {errors.confirmPassword?.message && (
+                <FormControlHelperText>
+                  <Text style={{ color: "red" }}>
+                    {errors.confirmPassword.message}
+                  </Text>
+                </FormControlHelperText>
+              )}
+            </FormControlHelper>
+          </FormControl>
+        )}
+      />
 
-      <Button
-        size="md"
-        onPress={handleSubmit(onSubmit)}
-        isDisabled={isLoading}
-      >
-        <ButtonText>{isLoading ? "Logging in..." : "Login"}</ButtonText>
+      <Button size="lg" onPress={handleSubmit(onSubmit)} disabled={isLoading}>
+        <ButtonSpinner color={colors.gray[400]} animating={isLoading} />
+        <ButtonText>{isLoading ? "Loading..." : "Register"}</ButtonText>
       </Button>
 
       <Divider className="my-6" />
 
       <HStack className="justify-center">
-        <Link href="/(auth)/register" className="text-sm text-blue-500">
-          <Text>Don't have an account? Register</Text>
+        <Link href="/(auth)/login" className="text-sm text-blue-500">
+          <Text>Already have an account? Login</Text>
         </Link>
       </HStack>
     </VStack>

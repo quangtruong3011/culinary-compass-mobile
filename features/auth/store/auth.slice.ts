@@ -8,8 +8,7 @@ const initialState: AuthState = {
   access_token: null,
   refresh_token: null,
   is_authenticated: false,
-  remember_me: false,
-  isLoading: false,
+  is_loading: false,
   error: null,
 };
 
@@ -23,34 +22,42 @@ const authSlice = createSlice({
         user: any;
         access_token: string | null;
         refresh_token: string | null;
-        remember_me?: boolean;
+        is_authenticated: boolean;
       }>
     ) => {
       const { user, access_token, refresh_token } = action.payload;
       state.user = user;
       state.access_token = access_token;
       state.refresh_token = refresh_token;
-      state.remember_me = action.payload.remember_me;
       state.is_authenticated = true;
     },
-    logout: (state) => {
+    clearCredentials: (state) => {
       state.user = null;
       state.access_token = null;
       state.refresh_token = null;
-      state.remember_me = false;
       state.is_authenticated = false;
+    },
+    setLoading: (state, action: PayloadAction<boolean>) => {
+      state.is_loading = action.payload;
+    },
+    setError: (state, action: PayloadAction<string | null>) => {
+      state.error = action.payload;
     },
   },
   extraReducers(builder) {
     builder.addMatcher(authApi.endpoints.login.matchPending, (state) => {
-      state.isLoading = true;
+      state.is_loading = true;
+      state.error = null;
     });
     builder.addMatcher(
       authApi.endpoints.login.matchFulfilled,
       (state, { payload }) => {
-        state.isLoading = false;
+        state.is_loading = false;
         state.access_token = payload.data.access_token;
         state.refresh_token = payload.data.refresh_token;
+        state.is_authenticated = true;
+
+        authApi.endpoints.getMe.initiate();
 
         saveAuthTokens(payload.data.access_token, payload.data.refresh_token);
       }
@@ -58,15 +65,52 @@ const authSlice = createSlice({
     builder.addMatcher(
       authApi.endpoints.login.matchRejected,
       (state, { payload }) => {
-        state.isLoading = false;
-        // state.error =
-        //   typeof payload?.data === "string"
-        //     ? payload.data
-        //     : JSON.stringify(payload?.data) || "Login failed";
+        state.is_loading = false;
+        state.error = (payload as any)?.data?.message || "Login failed";
+      }
+    );
+    builder.addMatcher(authApi.endpoints.getMe.matchPending, (state) => {
+      state.is_loading = true;
+      state.error = null;
+    });
+    builder.addMatcher(
+      authApi.endpoints.getMe.matchFulfilled,
+      (state, { payload }) => {
+        state.is_loading = false;
+        state.is_authenticated = true;
+        state.user = payload;
+      }
+    );
+    builder.addMatcher(
+      authApi.endpoints.getMe.matchRejected,
+      (state, { payload }) => {
+        state.is_loading = false;
+        state.is_authenticated = false;
+        state.error = (payload as any)?.data?.message || "Failed to fetch user";
+      }
+    );
+    builder.addMatcher(authApi.endpoints.refreshToken.matchPending, (state) => {
+      state.is_loading = true;
+      state.error = null;
+    });
+    builder.addMatcher(
+      authApi.endpoints.refreshToken.matchFulfilled,
+      (state, { payload }) => {
+        state.is_loading = false;
+        state.access_token = payload.access_token;
+        state.refresh_token = payload.refresh_token;
+        state.user = payload.user;
+        state.is_authenticated = true;
+
+        authApi.endpoints.getMe.initiate();
+        // authApi.util.invalidateTags(["Auth"]);
+
+        saveAuthTokens(payload.access_token, payload.refresh_token);
       }
     );
   },
 });
 
-export const { setCredentials, logout } = authSlice.actions;
+export const { setCredentials, clearCredentials, setLoading, setError } =
+  authSlice.actions;
 export default authSlice.reducer;
