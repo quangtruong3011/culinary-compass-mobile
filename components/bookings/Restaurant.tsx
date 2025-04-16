@@ -9,8 +9,8 @@ type Props = {
 const Restaurant = ({ name, image }: Props) => {
     const router = useRouter();
     const { width } = useWindowDimensions();
-    const imageWidth = width * 0.9; // Giảm 10% chiều rộng (5% mỗi bên)
-    const horizontalMargin = width * 0.05; // Lề 5% mỗi bên
+    const imageWidth = width * 0.9; 
+    const horizontalMargin = width * 0.05; 
     
     return (
         <Pressable 
@@ -36,11 +36,11 @@ const styles = StyleSheet.create({
     container: {
         backgroundColor: 'white',
         marginBottom: 16,
-        borderRadius: 12, // Thêm bo tròn nếu muốn
-        overflow: 'hidden', // Để bo tròn có hiệu lực
+        borderRadius: 12, 
+        overflow: 'hidden', 
     },
     imageContainer: {
-        // Các thuộc tính khác sẽ được set động
+        
     },
     image: {
         width: '100%',

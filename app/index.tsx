@@ -11,6 +11,9 @@ export default function IndexScreen() {
         <Link href="/user/booking/selectRestaurant" style={{ padding: 20 }}>
           Go to Bookings
         </Link>
+        <Link href="/admin/table/viewListTable" style={{ padding: 20 }}>
+          Go to Table
+        </Link>
       </SafeAreaView>
     </SafeAreaProvider>
   );
