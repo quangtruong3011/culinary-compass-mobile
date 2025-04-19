@@ -4,6 +4,8 @@ import { authApi } from "@/features/auth/api/auth.api";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { persistStore, persistReducer } from "redux-persist";
 import { userApi } from "@/features/users/api/user.api";
+import { restaurantApi } from "@/features/restaurants/api/restaurant.api";
+import { restaurantReducer } from "@/features/restaurants/store/restaurant.slice";
 
 const persistConfig = {
   key: "root",
@@ -15,6 +17,8 @@ const rootReducer = combineReducers({
   auth: authReducer,
   [authApi.reducerPath]: authApi.reducer,
   [userApi.reducerPath]: userApi.reducer,
+  [restaurantApi.reducerPath]: restaurantApi.reducer,
+  restaurant: restaurantReducer
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
@@ -26,7 +30,7 @@ export const store = configureStore({
       serializableCheck: {
         ignoredActions: ["persist/PERSIST"],
       },
-    }).concat(authApi.middleware, userApi.middleware),
+    }).concat(authApi.middleware, userApi.middleware, restaurantApi.middleware),
 
   // devTools: process.env.NODE_ENV !== "production",
 });

@@ -8,7 +8,7 @@ import {
 import { LoginFormData, RegisterFormData } from "@/lib/validation/authSchema";
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { RootState } from "@/store/store";
-import { setCredentials } from "../store/auth.slice";
+import { saveAuthTokens } from "../utils/auth.storage";
 
 const baseQuery = fetchBaseQuery({
   baseUrl: BASE_URL,
@@ -38,16 +38,9 @@ const baseQueryWithReauth = async (args: any, api: any, extraOptions: any) => {
       );
 
       if (refreshResult.data) {
-        // api.dispatch(
-        //   setCredentials({
-        //     access_token: (refreshResult.data as RefreshTokenResponse)
-        //       .access_token,
-        //     refresh_token: (refreshResult.data as RefreshTokenResponse)
-        //       .refresh_token,
-        //     user: (refreshResult.data as RefreshTokenResponse).user,
-        //     is_authenticated: true,
-        //   })
-        // );
+        const { access_token, refresh_token } =
+          refreshResult.data as RefreshTokenResponse;
+        await saveAuthTokens(access_token, refresh_token);
         result = await baseQuery(args, api, extraOptions);
       }
     }
@@ -87,7 +80,6 @@ export const authApi = createApi({
         method: "POST",
       }),
       transformResponse: (response: { data: GetMeResponse }) => {
-        console.log("GetMe Response:", response.data);
         return response.data;
       },
     }),

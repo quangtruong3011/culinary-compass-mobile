@@ -15,7 +15,7 @@ const ViewListTable = () => {
   const [selectedTableId, setSelectedTableId] = useState<number | null>(null);
 
   const handleAdd = () => {
-    router.push("../create");
+    router.push("/admin/table/create");
   };
 
   const handleEdit = () => {
@@ -23,7 +23,7 @@ const ViewListTable = () => {
       Alert.alert("Vui lòng chọn 1 bàn để chỉnh sửa");
       return;
     }
-    router.push(`../edit/${selectedTableId}`);
+    router.push(`/admin/table/edit/${selectedTableId}`);
   };
 
   const handleDelete = () => {

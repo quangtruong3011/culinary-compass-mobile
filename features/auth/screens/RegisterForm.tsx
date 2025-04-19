@@ -2,8 +2,8 @@ import { Button, ButtonSpinner, ButtonText } from "@/components/ui/button";
 import { Divider } from "@/components/ui/divider";
 import {
   FormControl,
-  FormControlHelper,
-  FormControlHelperText,
+  FormControlError,
+  FormControlErrorText,
   FormControlLabel,
   FormControlLabelText,
 } from "@/components/ui/form-control";
@@ -55,13 +55,13 @@ export const RegisterForm = ({
                 onChangeText={onChange}
               />
             </Input>
-            <FormControlHelper>
+            <FormControlError>
               {errors.email?.message && (
-                <FormControlHelperText>
+                <FormControlErrorText>
                   <Text style={{ color: "red" }}>{errors.email.message}</Text>
-                </FormControlHelperText>
+                </FormControlErrorText>
               )}
-            </FormControlHelper>
+            </FormControlError>
           </FormControl>
         )}
       />
@@ -87,15 +87,15 @@ export const RegisterForm = ({
                 onChangeText={onChange}
               />
             </Input>
-            <FormControlHelper>
+            <FormControlError>
               {errors.password?.message && (
-                <FormControlHelperText>
+                <FormControlErrorText>
                   <Text style={{ color: "red" }}>
                     {errors.password.message}
                   </Text>
-                </FormControlHelperText>
+                </FormControlErrorText>
               )}
-            </FormControlHelper>
+            </FormControlError>
           </FormControl>
         )}
       />
@@ -121,15 +121,15 @@ export const RegisterForm = ({
                 onChangeText={onChange}
               />
             </Input>
-            <FormControlHelper>
+            <FormControlError>
               {errors.confirmPassword?.message && (
-                <FormControlHelperText>
+                <FormControlErrorText>
                   <Text style={{ color: "red" }}>
                     {errors.confirmPassword.message}
                   </Text>
-                </FormControlHelperText>
+                </FormControlErrorText>
               )}
-            </FormControlHelper>
+            </FormControlError>
           </FormControl>
         )}
       />

@@ -1,9 +1,11 @@
 import { HapticTab } from "@/components/HapticTab";
+import { Icon } from "@/components/ui/icon";
 import { IconSymbol } from "@/components/ui/IconSymbol";
 import TabBarBackground from "@/components/ui/TabBarBackground";
 import { Colors } from "@/constants/Colors";
 import { Tabs } from "expo-router";
 import { Platform, useColorScheme } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 
 export default function AdminLayout() {
   const colorScheme = useColorScheme();
@@ -33,10 +35,11 @@ export default function AdminLayout() {
         }}
       />
       <Tabs.Screen
-        name="Restaurant"
+        name="restaurant"
         options={{
+          title: "Restaurants",
           tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="fork.knife" color={color} />
+            <Ionicons size={28} name="restaurant" color={color} />
           ),
         }}
       />

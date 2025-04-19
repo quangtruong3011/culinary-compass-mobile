@@ -11,7 +11,7 @@ export default function LoginScreen() {
   const handleSubmit = async (data: LoginFormData) => {
     try {
       await login(data).unwrap();
-      router.push("../user/index");
+      router.push("/user");
     } catch (error) {
       console.error("Login error:", error);
     }

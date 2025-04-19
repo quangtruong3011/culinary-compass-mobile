@@ -48,7 +48,7 @@ export default function UserProfile() {
 
       {is_authenticated && (
         <VStack className="p-4 gap-4">
-          <Button onPress={() => router.push("../admin/index")}>
+          <Button onPress={() => router.push("/admin")}>
             <ButtonText>Restaurant Manager</ButtonText>
           </Button>
           <Button onPress={() => logout()}>

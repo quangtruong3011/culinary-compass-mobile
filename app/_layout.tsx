@@ -35,12 +35,11 @@ function MainApp() {
             value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
           >
             <Stack screenOptions={{ headerShown: false }}>
-              {/* {isAdmin ? (
+              {isAdmin ? (
                 <Stack.Screen name="admin" />
               ) : (
                 <Stack.Screen name="user" />
-              )} */}
-              <Stack.Screen name="admin" />
+              )}
               <Stack.Screen name="+not-found" />
             </Stack>
             <StatusBar style="auto" />
