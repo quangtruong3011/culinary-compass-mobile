@@ -7,12 +7,21 @@ import {
   Button,
   StyleSheet,
   Alert,
+  ActivityIndicator,
 } from "react-native";
 import ListTable from "@/components/tables/ListTable";
+import { useDeleteTableMutation, useGetTablesQuery } from "@/features/tables/api/table.api";
+import { isLoading } from "expo-font";
 
-const ViewListTable = () => {
+export default function TableScreen() {
   const router = useRouter();
   const [selectedTableId, setSelectedTableId] = useState<number | null>(null);
+  const [selectedRestaurantId, setSelectedRestaurantId] = useState<number | null>(null);
+
+  const { data, isLoading, isError, refetch } = useGetTablesQuery({ restaurantId: selectedRestaurantId ?? 0 });
+  console.log("data", data?.results);
+
+  const [deleteTable, { isLoading: isDeleting }] = useDeleteTableMutation();
 
   const handleAdd = () => {
     router.push("/admin/table/create");
@@ -40,21 +49,22 @@ const ViewListTable = () => {
         {
           text: "Xoá",
           style: "destructive",
-          onPress: () => {
-            console.log("Đã xoá bàn có id:", selectedTableId);
+          onPress: async () => {
+            await deleteTable(selectedTableId).unwrap();
             setSelectedTableId(null);
+            refetch(); 
           },
         },
       ]
     );
   };
-  
 
   return (
     <SafeAreaView style={styles.container}>
       <Text style={styles.title}>Danh sách bàn</Text>
 
       <ListTable
+        tables={data?.results || []}
         selectedTableId={selectedTableId}
         onSelectTable={(id) => setSelectedTableId(id)}
       />
@@ -98,4 +108,3 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ViewListTable;

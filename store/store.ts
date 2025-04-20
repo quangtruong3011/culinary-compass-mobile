@@ -6,6 +6,7 @@ import { persistStore, persistReducer } from "redux-persist";
 import { userApi } from "@/features/users/api/user.api";
 import { restaurantApi } from "@/features/restaurants/api/restaurant.api";
 import { restaurantReducer } from "@/features/restaurants/store/restaurant.slice";
+import { tableApi } from "@/features/tables/api/table.api";
 
 const persistConfig = {
   key: "root",
@@ -18,7 +19,8 @@ const rootReducer = combineReducers({
   [authApi.reducerPath]: authApi.reducer,
   [userApi.reducerPath]: userApi.reducer,
   [restaurantApi.reducerPath]: restaurantApi.reducer,
-  restaurant: restaurantReducer
+  restaurant: restaurantReducer,
+  [tableApi.reducerPath]: tableApi.reducer,
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
@@ -30,7 +32,7 @@ export const store = configureStore({
       serializableCheck: {
         ignoredActions: ["persist/PERSIST"],
       },
-    }).concat(authApi.middleware, userApi.middleware, restaurantApi.middleware),
+    }).concat(authApi.middleware, userApi.middleware, restaurantApi.middleware, tableApi.middleware),
 
   // devTools: process.env.NODE_ENV !== "production",
 });

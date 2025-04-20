@@ -1,5 +1,20 @@
-import { Redirect } from "expo-router";
-
-export default function Index() {
-  return <Redirect href="/user" />;
+import { Link, Stack } from "expo-router";
+import { View } from "react-native";
+import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+export default function IndexScreen() {
+  return (
+    <SafeAreaProvider>
+      <SafeAreaView>
+        <Link href="/user" style={{ padding: 20 }}>
+          Go to Dashboard
+        </Link>
+        <Link href="/user/booking/selectRestaurant" style={{ padding: 20 }}>
+          Go to Bookings
+        </Link>
+        <Link href="/admin/table" style={{ padding: 20 }}>
+          Go to Table
+        </Link>
+      </SafeAreaView>
+    </SafeAreaProvider>
+  );
 }

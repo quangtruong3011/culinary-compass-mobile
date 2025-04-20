@@ -1,71 +1,59 @@
-import { FlatList, TouchableOpacity, StyleSheet, View } from "react-native";
-import Table from "../bookings/Table";
+import React from "react";
+import { FlatList, TouchableOpacity, Text, StyleSheet, View } from "react-native";
 
-const listTable = [
-    { id: 1, name: "Table 1", capacity: 4 },
-    { id: 2, name: "Table 2", capacity: 2 },
-    { id: 3, name: "Table 3", capacity: 6 },
-    { id: 4, name: "Table 4", capacity: 8 },
-    { id: 5, name: "Table 5", capacity: 10 },
-    { id: 6, name: "Table 6", capacity: 12 },
-];
+type Table = {
+  id: number;
+  name: string;
+  capacity: number;
+};
 
-const ListTable = ({
-  selectedTableId,
-  onSelectTable,
-}: {
+type Props = {
+  tables: Table[];
   selectedTableId: number | null;
   onSelectTable: (id: number) => void;
-}) => {
+};
+
+const ListTable = ({ tables, selectedTableId, onSelectTable }: Props) => {
   return (
     <FlatList
-      data={listTable}
-      numColumns={2}
+      data={tables}
       keyExtractor={(item) => item.id.toString()}
-      contentContainerStyle={styles.listContent}
-      style={styles.list}
-      renderItem={({ item }) => {
-        const isSelected = selectedTableId === item.id;
-
-        return (
-          <TouchableOpacity
-            onPress={() => onSelectTable(item.id)}
-            style={[
-              styles.tableItem,
-              isSelected && styles.selectedTable,
-            ]}
-          >
-            <Table name={item.name} capacity={item.capacity} />
-          </TouchableOpacity>
-        );
-      }}
-      showsVerticalScrollIndicator={true}
+      renderItem={({ item }) => (
+        <TouchableOpacity
+          onPress={() => onSelectTable(item.id)}
+          style={[
+            styles.tableItem,
+            selectedTableId === item.id && styles.selectedTable,
+          ]}
+        >
+          <Text style={styles.tableName}>{item.name}</Text>
+          <Text style={styles.tableCapacity}>Sức chứa: {item.capacity}</Text>
+        </TouchableOpacity>
+      )}
     />
   );
 };
 
 const styles = StyleSheet.create({
-  list: {
-    flex: 1,
-  },
-  listContent: {
-    paddingBottom: 20,
-  },
   tableItem: {
-    flex: 1,
-    margin: 8,
     padding: 16,
+    marginVertical: 8,
     backgroundColor: "#f5f5f5",
-    borderRadius: 10,
-    alignItems: "center",
-    justifyContent: "center",
-    minHeight: 100,
-    maxWidth: "46%",
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "#ddd",
   },
   selectedTable: {
     backgroundColor: "#d1f7ff",
-    borderWidth: 1.5,
     borderColor: "#00c8e0",
+  },
+  tableName: {
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+  tableCapacity: {
+    fontSize: 14,
+    color: "#666",
   },
 });
 

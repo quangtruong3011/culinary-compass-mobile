@@ -1,5 +1,6 @@
 import { TextInput, View, Text, Button, StyleSheet } from "react-native";
 import { useState, useEffect } from "react";
+import { set } from "zod";
 
 interface TableData {
   name: string;
@@ -10,23 +11,27 @@ interface Props {
   initialData?: TableData | null;
   onSave: (data: TableData) => void;
   onCancel: () => void;
+  restaurantId: number;
 }
 
-const CreateOrEditTable = ({ initialData = null, onSave, onCancel }: Props) => {
+const CreateOrEditTable = ({ initialData = null, onSave, onCancel, restaurantId }: Props) => {
   const [name, setName] = useState('');
   const [capacity, setCapacity] = useState('');
+  const [currentRestaurantId, setRestaurantId] = useState(restaurantId.toString());
 
   useEffect(() => {
     if (initialData) {
       setName(initialData.name || '');
       setCapacity(initialData.capacity?.toString() || '');
+      setRestaurantId(restaurantId.toString());
     }
-  }, [initialData]);
+  }, [initialData, restaurantId]);
 
   const handleSave = () => {
     const tableData = {
       name,
       capacity: parseInt(capacity) || 0,
+      restaurantId: parseInt(currentRestaurantId),
     };
     onSave(tableData);
   };
