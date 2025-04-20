@@ -3,16 +3,6 @@ export interface CreateOrEditRestaurantFormProps {
   isLoading: boolean;
 }
 
-export interface FindAllRestaurantsForAdminResponse {
-  data: {
-    results: Restaurant[];
-    total: number;
-    page: string;
-    limit: string;
-    totalPages: number;
-  };
-}
-
 export interface Provinces {
   name: string;
   code: number;
@@ -57,7 +47,7 @@ export interface Restaurant {
 }
 
 export interface CreateOrEditRestaurantDto {
-  id: number | null;
+  // id: number;
   name: string;
   address: string;
   province: string;
@@ -66,17 +56,21 @@ export interface CreateOrEditRestaurantDto {
   // latitude: number;
   // longitude: number;
   phone: string;
-  // email: string;
-  website: string | null;
-  // description: string;
-  openingTime: string;
-  closingTime: string;
+  email?: string;
+  website?: string;
+  description: string;
+  openingTime: Date;
+  closingTime: Date;
   images: string[];
 }
 
 export interface RestaurantState {
-  restaurants: Restaurant[];
-  currentRestaurant: Restaurant | null;
+  restaurants: any;
+  currentRestaurant: any;
   is_loading: boolean;
   error: string | null;
 }
+
+export { GetAllRestaurantsForUser } from "./get-all-restaurant-for-user.interface";
+export { GetAllRestaurantsForAdmin } from "./get-all-restaurant-for-admin.interface";
+export { GetRestaurantForUser } from "./get-restaurant-for-user.interface";

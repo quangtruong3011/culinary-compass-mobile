@@ -5,7 +5,7 @@ import { RootState } from "@/store/store";
 import { fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 const baseQuery = fetchBaseQuery({
-  baseUrl: BASE_URL,
+  baseUrl: "http://192.168.1.190:3000",
   prepareHeaders: (headers, { getState }) => {
     const token = (getState() as RootState).auth.access_token;
     if (token) {
@@ -20,6 +20,7 @@ const baseQueryWithReauth = async (args: any, api: any, extraOptions: any) => {
 
   if (result.error && result.error.status === 401) {
     const refreshToken = (api.getState() as RootState).auth.refresh_token;
+
     if (refreshToken) {
       const refreshResult = await baseQuery(
         {
@@ -32,11 +33,20 @@ const baseQueryWithReauth = async (args: any, api: any, extraOptions: any) => {
       );
 
       if (refreshResult.data) {
-        const { access_token, refresh_token } =
-          refreshResult.data as RefreshTokenResponse;
-        await saveAuthTokens(access_token, refresh_token);
+        const responseData = (refreshResult.data as any).data;
+        if (responseData) {
+          const { access_token, refresh_token } = responseData;
 
-        result = await baseQuery(args, api, extraOptions);
+          if (access_token && refresh_token) {
+            await saveAuthTokens(access_token, refresh_token);
+
+            result = await baseQuery(args, api, extraOptions);
+          } else {
+            console.error("Tokens are missing in response");
+          }
+        } else {
+          console.error("No data in refresh response");
+        }
       }
     }
   }

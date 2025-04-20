@@ -1,7 +1,8 @@
-import { Box } from "@/components/ui/box";
 import { CloseIcon, Icon } from "@/components/ui/icon";
-import { Image } from "@/components/ui/image";
-import { Pressable } from "react-native";
+import { Dimensions, Pressable, View } from "react-native";
+import { Image } from "expo-image";
+
+const screenWidth = Dimensions.get("window").width;
 
 const RenderImageItem = ({
   item,
@@ -13,20 +14,38 @@ const RenderImageItem = ({
   removeImage: (index: number) => void;
 }) => {
   return (
-    <Box>
+    <View
+      style={{
+        width: "32%",
+        position: "relative",
+        marginRight: index % 3 === 2 ? 0 : 8,
+        marginBottom: 8,
+      }}
+    >
       <Image
         source={{ uri: item }}
-        className="w-32 h-32 rounded-lg"
+        style={{
+          width: "100%",
+          height: (screenWidth * 1) / 3,
+          borderRadius: 8,
+          objectFit: "cover",
+        }}
         alt={`Image ${index + 1}`}
-        resizeMode="cover"
       />
       <Pressable
-        className="absolute top-2 right-2 bg-red-500 rounded-full p-1"
+        style={{
+          position: "absolute",
+          top: 4,
+          right: 4,
+          backgroundColor: "#ef4444",
+          borderRadius: 9999,
+          padding: 2,
+        }}
         onPress={() => removeImage(index)}
       >
-        <Icon as={CloseIcon} size="md" />
+        <Icon as={CloseIcon} size="md" color="white" />
       </Pressable>
-    </Box>
+    </View>
   );
 };
 

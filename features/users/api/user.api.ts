@@ -15,17 +15,7 @@ export const userApi = createApi({
       return headers;
     },
   }),
-  endpoints: (builder) => ({
-    // getMe: builder.query<GetMeResponse, void>({
-    //   query: () => ({
-    //     url: "/users/me",
-    //     method: "POST",
-    //   }),
-    //   transformResponse: (response: { data: GetMeResponse }) => {
-    //     return response.data;
-    //   },
-    // }),
-  }),
+  endpoints: (builder) => ({}),
 });
 
-// export const { useGetMeQuery } = userApi;
+export const {} = userApi;

@@ -19,6 +19,8 @@ export default function CreateRestauranScreen() {
     );
     const payload = {
       ...data,
+      openingTime: new Date(data.openingTime),
+      closingTime: new Date(data.closingTime),
       images: imageUris,
     };
 

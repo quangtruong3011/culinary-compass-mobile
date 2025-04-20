@@ -20,10 +20,13 @@ export interface LoginResponse {
 
 export interface RegisterResponse {
   data: {
-    id: string;
-    email: string;
-    roles: string[];
+    user: {
+      id: string;
+      email: string;
+      roles: string[];
+    };
     access_token: string;
+    refresh_token: string;
   };
 }
 
@@ -34,11 +37,13 @@ export interface GetMeResponse {
 }
 
 export interface RefreshTokenResponse {
-  user: {
-    id: string;
-    email: string;
-    roles: string[];
+  data: {
+    user: {
+      id: number;
+      email: string;
+      roles: string[];
+    };
+    access_token: string;
+    refresh_token: string;
   };
-  access_token: string;
-  refresh_token: string;
 }

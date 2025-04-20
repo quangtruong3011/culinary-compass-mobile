@@ -21,9 +21,9 @@ const CreateTable = () => {
     return (
         <View>
             <Text style={{ fontSize: 24, fontWeight: 'bold', margin: 16 }}>Create Table</Text>
-            <CreateOrEditTable
+            {/* <CreateOrEditTable
                 onSave={handleSave} onCancel={handleCancel} restaurantId={}
-            />
+            /> */}
         </View>
     )
 }
