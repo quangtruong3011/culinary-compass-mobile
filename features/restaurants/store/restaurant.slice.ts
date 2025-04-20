@@ -38,7 +38,7 @@ const restaurantSlice = createSlice({
       restaurantApi.endpoints.createRestaurant.matchFulfilled,
       (state, { payload }) => {
         state.is_loading = false;
-        state.restaurants.push(payload.data);
+        // state.restaurants.push(payload.data);
       }
     );
     builder.addMatcher(
@@ -65,6 +65,28 @@ const restaurantSlice = createSlice({
     );
     builder.addMatcher(
       restaurantApi.endpoints.findAllRestaurantsForAdmin.matchRejected,
+      (state, { error }) => {
+        state.is_loading = false;
+        state.error =
+          error.message || "An error occurred while fetching restaurants.";
+      }
+    );
+    builder.addMatcher(
+      restaurantApi.endpoints.findAllRestaurantsForUser.matchPending,
+      (state) => {
+        state.is_loading = true;
+        state.error = null;
+      }
+    );
+    builder.addMatcher(
+      restaurantApi.endpoints.findAllRestaurantsForUser.matchFulfilled,
+      (state, { payload }) => {
+        state.is_loading = false;
+        state.restaurants = payload.data.results;
+      }
+    );
+    builder.addMatcher(
+      restaurantApi.endpoints.findAllRestaurantsForUser.matchRejected,
       (state, { error }) => {
         state.is_loading = false;
         state.error =

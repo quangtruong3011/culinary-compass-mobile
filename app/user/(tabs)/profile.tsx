@@ -1,16 +1,38 @@
+import RestaurantOpeningConfirmationModal from "@/components/RestaurantOpeningConfirmationModal";
 import { Avatar } from "@/components/ui/avatar";
 import { Button, ButtonText } from "@/components/ui/button";
 import { HStack } from "@/components/ui/hstack";
 import { IconSymbol } from "@/components/ui/IconSymbol";
 import { Text } from "@/components/ui/text";
 import { VStack } from "@/components/ui/vstack";
+import { useUpdateUserRolesMutation } from "@/features/auth/api/auth.api";
 import { useAuth } from "@/features/auth/hooks/useAuth";
+import { useUserRoles } from "@/features/auth/hooks/useUserRoles";
 import { useRouter } from "expo-router";
+import { useState } from "react";
 
 export default function UserProfile() {
   const { is_authenticated, user, logout } = useAuth();
+  const { isAdmin } = useUserRoles();
+  const [updateUserRole, { isLoading }] = useUpdateUserRolesMutation();
   console.log("UserProfile", user, is_authenticated);
   const router = useRouter();
+
+  const [isOpenModal, setIsOpenModal] = useState(false);
+
+  const handleOpenModal = () => setIsOpenModal(true);
+  const handleCloseModal = () => setIsOpenModal(false);
+
+  const handleConfirm = async () => {
+    try {
+      await updateUserRole({ roleName: "admin" }).unwrap();
+      handleCloseModal();
+
+      router.push("/admin");
+    } catch (error) {
+      console.error("Error updating user role:", error);
+    }
+  };
 
   return (
     <VStack>
@@ -48,14 +70,28 @@ export default function UserProfile() {
 
       {is_authenticated && (
         <VStack className="p-4 gap-4">
-          <Button onPress={() => router.push("/admin")}>
-            <ButtonText>Restaurant Manager</ButtonText>
-          </Button>
+          {isAdmin ? (
+            <Button onPress={() => router.push("/admin")}>
+              <ButtonText>Restaurant Manager</ButtonText>
+            </Button>
+          ) : (
+            <Button onPress={handleOpenModal}>
+              <ButtonText>Open Restaurant</ButtonText>
+            </Button>
+          )}
+
           <Button onPress={() => logout()}>
             <ButtonText>Logout</ButtonText>
           </Button>
         </VStack>
       )}
+
+      <RestaurantOpeningConfirmationModal
+        isOpen={isOpenModal}
+        onConfirm={handleConfirm}
+        onCancel={handleCloseModal}
+        title="Are you sure you want to open the restaurant?"
+      />
     </VStack>
   );
 }

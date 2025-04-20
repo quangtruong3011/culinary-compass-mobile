@@ -9,5 +9,5 @@ export class PaginationResult<T> {
 export interface PaginationOptions {
   page?: number;
   limit?: number;
-  filter?: string;
+  filterText?: string;
 }

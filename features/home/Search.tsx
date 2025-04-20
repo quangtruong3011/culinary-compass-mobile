@@ -1,6 +1,7 @@
 import { Icon, SearchIcon } from "@/components/ui/icon";
 import { Input, InputField, InputIcon, InputSlot } from "@/components/ui/input";
 import { useEffect, useState } from "react";
+import { Controller, useForm } from "react-hook-form";
 
 interface SearchProps {
   filterText: string;
@@ -8,6 +9,12 @@ interface SearchProps {
 }
 
 const Search = ({ filterText, onFilterTextChange }: SearchProps) => {
+  const { control } = useForm({
+    defaultValues: {
+      filterText: filterText,
+    },
+  });
+
   const [displayedPlaceholder, setDisplayedPlaceholder] = useState("");
   const [currentIndex, setCurrentIndex] = useState(0);
   const [currentPlaceholderIndex, setCurrentPlaceholderIndex] = useState(0);
@@ -62,25 +69,35 @@ const Search = ({ filterText, onFilterTextChange }: SearchProps) => {
   }, [currentIndex, currentPlaceholderIndex, displayedPlaceholder]);
 
   return (
-    <Input
-      variant="rounded"
-      size="lg"
-      isDisabled={false}
-      isRequired={true}
-      isReadOnly={false}
-    >
-      <InputField
-        type="text"
-        placeholder={displayedPlaceholder}
-        value={filterText}
-        onChangeText={onFilterTextChange}
-      />
-      <InputSlot className="pr-3">
-        <InputIcon>
-          <Icon as={SearchIcon} size="sm" />
-        </InputIcon>
-      </InputSlot>
-    </Input>
+    <Controller
+      name="filterText"
+      control={control}
+      defaultValue={filterText}
+      render={({ field: { onChange, value } }) => (
+        <Input
+          variant="rounded"
+          size="lg"
+          isDisabled={false}
+          isRequired={true}
+          isReadOnly={false}
+        >
+          <InputField
+            type="text"
+            placeholder={displayedPlaceholder}
+            value={value}
+            onChangeText={(text) => {
+              onChange(text);
+              onFilterTextChange(text);
+            }}
+          />
+          <InputSlot className="pr-3">
+            <InputIcon>
+              <Icon as={SearchIcon} size="sm" />
+            </InputIcon>
+          </InputSlot>
+        </Input>
+      )}
+    />
   );
 };
 

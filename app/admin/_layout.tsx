@@ -1,14 +1,21 @@
 import { HapticTab } from "@/components/HapticTab";
-import { Icon } from "@/components/ui/icon";
 import { IconSymbol } from "@/components/ui/IconSymbol";
 import TabBarBackground from "@/components/ui/TabBarBackground";
 import { Colors } from "@/constants/Colors";
-import { Tabs } from "expo-router";
+import { Redirect, Tabs } from "expo-router";
 import { Platform, useColorScheme } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { useUserRoles } from "@/features/auth/hooks/useUserRoles";
+import { useEffect } from "react";
 
 export default function AdminLayout() {
   const colorScheme = useColorScheme();
+
+  const { isAdmin } = useUserRoles();
+
+  if (!isAdmin) {
+    return <Redirect href="/user" />;
+  }
 
   return (
     <Tabs

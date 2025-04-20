@@ -38,7 +38,7 @@ function MainApp() {
               {isAdmin ? (
                 <Stack.Screen name="admin" />
               ) : (
-                <Stack.Screen name="user" />
+                <Stack.Screen name="user/(tabs)" />
               )}
               <Stack.Screen name="+not-found" />
             </Stack>

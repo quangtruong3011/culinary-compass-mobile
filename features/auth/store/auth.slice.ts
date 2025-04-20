@@ -108,6 +108,47 @@ const authSlice = createSlice({
         saveAuthTokens(payload.access_token, payload.refresh_token);
       }
     );
+    builder.addMatcher(authApi.endpoints.register.matchPending, (state) => {
+      state.is_loading = true;
+      state.error = null;
+    });
+    builder.addMatcher(
+      authApi.endpoints.register.matchFulfilled,
+      (state, { payload }) => {
+        state.is_loading = false;
+        state.is_authenticated = true;
+
+        saveAuthTokens(payload.data.access_token, payload.data.refresh_token);
+      }
+    );
+    builder.addMatcher(
+      authApi.endpoints.register.matchRejected,
+      (state, { payload }) => {
+        state.is_loading = false;
+        state.error = (payload as any)?.data?.message || "Registration failed";
+      }
+    );
+    builder.addMatcher(
+      authApi.endpoints.updateUserRoles.matchPending,
+      (state) => {
+        state.is_loading = true;
+        state.error = null;
+      }
+    );
+    builder.addMatcher(
+      authApi.endpoints.updateUserRoles.matchFulfilled,
+      (state, { payload }) => {
+        state.is_loading = false;
+        state.user = payload.data.user;
+      }
+    );
+    builder.addMatcher(
+      authApi.endpoints.updateUserRoles.matchRejected,
+      (state, { payload }) => {
+        state.is_loading = false;
+        // state.error = payload.error;
+      }
+    );
   },
 });
 

@@ -44,6 +44,7 @@ import {
   SelectTrigger,
 } from "@/components/ui/select";
 import { ChevronDownIcon } from "@/components/ui/icon";
+import { Textarea, TextareaInput } from "@/components/ui/textarea";
 
 const CreateOrEditRestaurantForm = ({
   onSubmit,
@@ -123,9 +124,9 @@ const CreateOrEditRestaurantForm = ({
 
   return (
     <VStack>
-      <Box>
+      <>
         <Text className="text-lg font-semibold mb-2 text-pink-500">Photos</Text>
-        <Text className="text-sm text-gray-500">
+        <Text className="text-sm text-gray-500" style={{ marginBottom: 8 }}>
           Note your first image will be cover later
         </Text>
         <Controller
@@ -147,9 +148,8 @@ const CreateOrEditRestaurantForm = ({
                       removeImage={removeImage}
                     />
                   )}
-                  keyExtractor={(item, index) => item + index}
+                  keyExtractor={(item, index) => index.toString()}
                   numColumns={3}
-                  contentContainerStyle={{ alignItems: "flex-start" }}
                   scrollEnabled={false}
                 />
               )}
@@ -184,7 +184,7 @@ const CreateOrEditRestaurantForm = ({
             </FormControl>
           )}
         />
-      </Box>
+      </>
 
       <Controller
         name="name"
@@ -439,7 +439,6 @@ const CreateOrEditRestaurantForm = ({
             <Input className="my-1">
               <InputField
                 type="text"
-                placeholder="Restaurant Phone"
                 onChangeText={onChange}
                 onBlur={onBlur}
                 value={value}
@@ -451,6 +450,68 @@ const CreateOrEditRestaurantForm = ({
               <FormControlError>
                 <FormControlErrorText>
                   {errors.phone.message}
+                </FormControlErrorText>
+              </FormControlError>
+            )}
+          </FormControl>
+        )}
+      />
+
+      <Controller
+        name="email"
+        control={control}
+        render={({ field: { onChange, onBlur, value } }) => (
+          <FormControl
+            isInvalid={!!errors.email}
+            isRequired={false}
+            isDisabled={isLoading}
+          >
+            <FormControlLabel>
+              <FormControlLabelText>Email</FormControlLabelText>
+            </FormControlLabel>
+            <Input className="my-1">
+              <InputField
+                type="text"
+                onChangeText={onChange}
+                onBlur={onBlur}
+                value={value}
+              />
+            </Input>
+            {errors.email && (
+              <FormControlError>
+                <FormControlErrorText>
+                  {errors.email.message}
+                </FormControlErrorText>
+              </FormControlError>
+            )}
+          </FormControl>
+        )}
+      />
+
+      <Controller
+        name="website"
+        control={control}
+        render={({ field: { onChange, onBlur, value } }) => (
+          <FormControl
+            isInvalid={!!errors.website}
+            isRequired={false}
+            isDisabled={isLoading}
+          >
+            <FormControlLabel>
+              <FormControlLabelText>Website</FormControlLabelText>
+            </FormControlLabel>
+            <Input className="my-1">
+              <InputField
+                type="text"
+                onChangeText={onChange}
+                onBlur={onBlur}
+                value={value}
+              />
+            </Input>
+            {errors.website && (
+              <FormControlError>
+                <FormControlErrorText>
+                  {errors.website.message}
                 </FormControlErrorText>
               </FormControlError>
             )}
@@ -539,6 +600,42 @@ const CreateOrEditRestaurantForm = ({
           }}
         />
       )}
+
+      <Controller
+        name="description"
+        control={control}
+        render={({ field: { onChange, onBlur, value } }) => (
+          <FormControl
+            isInvalid={!!errors.description}
+            isRequired={true}
+            isDisabled={isLoading}
+          >
+            <FormControlLabel>
+              <FormControlLabelText>Description</FormControlLabelText>
+            </FormControlLabel>
+            <Textarea
+              isReadOnly={false}
+              isDisabled={isLoading}
+              isInvalid={!!errors.description}
+            >
+              <TextareaInput
+                onChangeText={onChange}
+                onBlur={onBlur}
+                value={value}
+                numberOfLines={5}
+                maxLength={256}
+              />
+            </Textarea>
+            {errors.description && (
+              <FormControlError>
+                <FormControlErrorText>
+                  {errors.description.message}
+                </FormControlErrorText>
+              </FormControlError>
+            )}
+          </FormControl>
+        )}
+      />
 
       <Button
         onPress={handleSubmit(onSubmit)}
