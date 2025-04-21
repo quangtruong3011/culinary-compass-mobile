@@ -1,15 +1,15 @@
 import { Card } from "@/components/ui/card";
 import { Heading } from "@/components/ui/heading";
-import { Image } from "expo-image";
-import { Dimensions, TouchableOpacity } from "react-native";
-import { Text } from "@/components/ui/text";
 import { HStack } from "@/components/ui/hstack";
+import { Text } from "@/components/ui/text";
 import { Ionicons } from "@expo/vector-icons";
 import { Link } from "expo-router";
+import { Dimensions, TouchableOpacity } from "react-native";
+import { Image } from "expo-image";
 import { useDispatch } from "react-redux";
 import { setCurrentRestaurant } from "../store/restaurant.slice";
 
-interface RestaurantCardForUserProps {
+export interface RestaurantCardForAdminProps {
   id: number;
   uri: string;
   name: string;
@@ -20,22 +20,20 @@ interface RestaurantCardForUserProps {
 
 const screenWidth = Dimensions.get("window").width;
 
-const RestaurantCardForUser = ({
+const RestaurantCardForAdmin = ({
   id,
   uri,
   name,
   address,
   openingTime,
   closingTime,
-}: RestaurantCardForUserProps) => {
+}: RestaurantCardForAdminProps) => {
   const dispatch = useDispatch();
-
   const handlePress = () => {
     dispatch(setCurrentRestaurant(id));
   };
-
   return (
-    <Link href={`/user/restaurant/${id}`} asChild>
+    <Link href={`/admin/restaurant/${id}`} asChild>
       <TouchableOpacity onPress={handlePress}>
         <Card
           style={{
@@ -77,4 +75,4 @@ const RestaurantCardForUser = ({
   );
 };
 
-export default RestaurantCardForUser;
+export default RestaurantCardForAdmin;

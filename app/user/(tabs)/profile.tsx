@@ -8,8 +8,9 @@ import { VStack } from "@/components/ui/vstack";
 import { useUpdateUserRolesMutation } from "@/features/auth/api/auth.api";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { useUserRoles } from "@/features/auth/hooks/useUserRoles";
+import { getAuthTokens } from "@/features/auth/utils/auth.storage";
 import { useRouter } from "expo-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function UserProfile() {
   const { is_authenticated, user, logout } = useAuth();

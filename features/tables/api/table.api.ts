@@ -1,104 +1,57 @@
-import { BASE_URL } from "@/constants/constants";
-import { RefreshTokenResponse } from "@/features/auth/interfaces/auth.interface";
-import { saveAuthTokens } from "@/features/auth/utils/auth.storage";
-import { RootState } from "@/store/store";
-import { fetchBaseQuery, createApi } from "@reduxjs/toolkit/query/react";
-
-const baseQuery = fetchBaseQuery({
-  baseUrl: BASE_URL,
-  prepareHeaders: (headers, { getState }) => {
-    const token = (getState() as RootState).auth.access_token;
-    if (token) {
-      headers.set("Authorization", `Bearer ${token}`);
-    }
-    return headers;
-  },
-});
-
-const baseQueryWithReauth = async (args: any, api: any, extraOptions: any) => {
-  let result = await baseQuery(args, api, extraOptions);
-
-  if (result.error && result.error.status === 401) {
-    const refreshToken = (api.getState() as RootState).auth.refresh_token;
-    if (refreshToken) {
-      const refreshResult = await baseQuery(
-        {
-          url: "/auth/refresh-token",
-          method: "POST",
-          body: { refresh_token: refreshToken },
-        },
-        api,
-        extraOptions
-      );
-
-      if (refreshResult.data) {
-        const { access_token, refresh_token } =
-          refreshResult.data as RefreshTokenResponse;
-        await saveAuthTokens(access_token, refresh_token);
-        result = await baseQuery(args, api, extraOptions);
-      }
-    }
-  }
-
-  return result;
-};
+import baseQueryWithReauth from "@/shared/base.api";
+import { PaginationOptions } from "@/shared/pagination.interface";
+import { createApi } from "@reduxjs/toolkit/query/react";
+import { CreateOrEditTableDto } from "../interfaces/create-or-edit-table.interface";
+import { GetAllTableResponse } from "../interfaces/get-all-table.interface";
 
 export const tableApi = createApi({
   reducerPath: "tableApi",
   baseQuery: baseQueryWithReauth,
   tagTypes: ["Table"],
   endpoints: (builder) => ({
-    getTables: builder.query({
-      query: ({ restaurantId }: { restaurantId: number}) => ({
-        url: `/tables/${restaurantId}`,
+    findAllTablesForAdmin: builder.query<
+      GetAllTableResponse,
+      PaginationOptions
+    >({
+      query: (options) => ({
+        url: "/tables/find-all-for-admin",
+        method: "GET",
         params: {
-          page: 1,
-          limit: 10,
+          page: options.page,
+          limit: options.limit,
+          filterText: options.filterText,
         },
       }),
-      transformResponse: (response: any) => {
+      transformResponse: (response: GetAllTableResponse) => {
         return {
-          results: response.data.results,
+          data: {
+            results: response.data.results,
+            total: response.data.total,
+            page: response.data.page,
+            limit: response.data.limit,
+            totalPages: response.data.totalPages,
+          },
         };
       },
-
-      providesTags: ["Table"],
     }),
-    // getTableAvailable: builder.query({
-    //   query: () => ({
-    //     url: "/tables/available/${restaurantId}",
-
-    //   })
-    createTable: builder.mutation({
-      query: (newTable) => ({
+    createTable: builder.mutation<any, CreateOrEditTableDto>({
+      query: (body) => ({
         url: "/tables",
         method: "POST",
-        body: newTable,
-
+        body,
       }),
-      invalidatesTags: ["Table"],
     }),
-    updateTable: builder.mutation({
-      query: ({ id, ...patch }) => ({
-        url: `/tables/${id}`,
-        method: "PATCH",
-        body: patch,
-      }),
-      invalidatesTags: ["Table"],
-    }),
-    deleteTable: builder.mutation({
+    findOneTable: builder.query<any, number>({
       query: (id) => ({
         url: `/tables/${id}`,
-        method: "DELETE",
+        method: "GET",
       }),
-      invalidatesTags: ["Table"],
     }),
   }),
 });
 
 export const {
-  useGetTablesQuery,
+  useFindAllTablesForAdminQuery,
   useCreateTableMutation,
-  useUpdateTableMutation,
-  useDeleteTableMutation,
+  useFindOneTableQuery,
 } = tableApi;

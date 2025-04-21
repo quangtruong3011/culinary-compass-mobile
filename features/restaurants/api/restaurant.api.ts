@@ -11,18 +11,18 @@ import baseQueryWithReauth from "@/shared/base.api";
 export const restaurantApi = createApi({
   reducerPath: "restaurantApi",
   baseQuery: baseQueryWithReauth,
-  // tagTypes: ["Restaurant"],
   endpoints: (builder) => ({
     findAllRestaurantsForAdmin: builder.query<
       GetAllRestaurantsForAdmin,
       PaginationOptions
     >({
-      query: () => ({
+      query: (options) => ({
         url: "/restaurants/find-all-for-admin",
         method: "GET",
         params: {
-          page: 1,
-          limit: 20,
+          page: options.page,
+          limit: options.limit,
+          filterText: options.filterText,
         },
       }),
       transformResponse: (response: GetAllRestaurantsForAdmin) => {
@@ -36,7 +36,6 @@ export const restaurantApi = createApi({
           },
         };
       },
-      // providesTags: ["Restaurant"],
     }),
 
     createRestaurant: builder.mutation<any, CreateOrEditRestaurantDto>({

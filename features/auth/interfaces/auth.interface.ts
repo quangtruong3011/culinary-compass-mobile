@@ -1,6 +1,6 @@
 export interface AuthState {
   user: null | {
-    id: string;
+    id: number;
     email: string;
     roles: string[];
   };
@@ -21,7 +21,7 @@ export interface LoginResponse {
 export interface RegisterResponse {
   data: {
     user: {
-      id: string;
+      id: number;
       email: string;
       roles: string[];
     };
@@ -31,9 +31,11 @@ export interface RegisterResponse {
 }
 
 export interface GetMeResponse {
-  id: string;
-  email: string;
-  roles: string[];
+  data: {
+    id: number;
+    email: string;
+    roles: string[];
+  };
 }
 
 export interface RefreshTokenResponse {
