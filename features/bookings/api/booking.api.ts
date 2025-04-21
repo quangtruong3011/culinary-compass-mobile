@@ -3,56 +3,19 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { RootState } from "@/store/store";
 import {
   Booking,
-  CreateBookingDto,
   PaginationOptions,
   PaginationResult,
   UpdateBookingDto,
-} from "../interface/booking.interface";
-
-const baseQuery = fetchBaseQuery({
-  baseUrl: BASE_URL,
-  prepareHeaders: (headers, { getState }) => {
-    const token = (getState() as RootState).auth.access_token;
-    if (token) {
-      headers.set("Authorization", `Bearer ${token}`);
-    }
-    return headers;
-  },
-});
-
-const baseQueryWithReauth = async (args: any, api: any, extraOptions: any) => {
-  let result = await baseQuery(args, api, extraOptions);
-
-  if (result.error && result.error.status === 401) {
-    const refreshToken = (api.getState() as RootState).auth.refresh_token;
-    if (refreshToken) {
-      const refreshResult = await baseQuery(
-        {
-          url: "/auth/refresh-token",
-          method: "POST",
-          body: { refresh_token: refreshToken },
-        },
-        api,
-        extraOptions
-      );
-
-      if (refreshResult.data) {
-        const { access_token, refresh_token } = refreshResult.data as any;
-        // Lưu token mới vào storage nếu cần
-        result = await baseQuery(args, api, extraOptions);
-      }
-    }
-  }
-
-  return result;
-};
+} from "../interfaces/booking.interface";
+import baseQueryWithReauth from "@/shared/base.api";
+import { CreateBookingDto } from "../interfaces/create-booking.interface";
 
 export const bookingApi = createApi({
   reducerPath: "bookingApi",
   baseQuery: baseQueryWithReauth,
   tagTypes: ["Booking"],
   endpoints: (builder) => ({
-    createBooking: builder.mutation<Booking, CreateBookingDto>({
+    createBooking: builder.mutation<any, CreateBookingDto>({
       query: (body) => ({
         url: "/bookings",
         method: "POST",
