@@ -6,7 +6,6 @@ import { Redirect, Tabs } from "expo-router";
 import { Platform, useColorScheme } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useUserRoles } from "@/features/auth/hooks/useUserRoles";
-import { useEffect } from "react";
 
 export default function AdminLayout() {
   const colorScheme = useColorScheme();

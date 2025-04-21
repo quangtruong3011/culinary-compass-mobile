@@ -1,11 +1,9 @@
-import { useFindRestaurantForUserQuery } from "@/features/restaurants/api/restaurant.api";
 import RestaurantDetailForUser from "@/features/restaurants/screens/RestaurantDetailForUser";
 import { Stack, useLocalSearchParams } from "expo-router";
 import { FlatList } from "react-native-reanimated/lib/typescript/Animated";
 
-export default function RestaurantDetailScreen() {
+export default function RestaurantDetailForUserScreen() {
   const { id } = useLocalSearchParams();
-  const { data, isLoading, isError } = useFindRestaurantForUserQuery(id as string);
 
   return (
     <>

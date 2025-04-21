@@ -4,7 +4,9 @@ import { restaurantApi } from "../api/restaurant.api";
 
 const initialState: RestaurantState = {
   restaurants: [],
-  currentRestaurant: null,
+  currentRestaurant: {
+    id: null,
+  },
   is_loading: false,
   error: null,
 };
@@ -16,8 +18,8 @@ const restaurantSlice = createSlice({
     setRestaurants: (state, action) => {
       state.restaurants = action.payload;
     },
-    setCurrentRestaurant: (state, action) => {
-      state.currentRestaurant = action.payload;
+    setCurrentRestaurant: (state, { payload }) => {
+      state.currentRestaurant.id = payload;
     },
     setLoading: (state, action) => {
       state.is_loading = action.payload;
@@ -93,6 +95,7 @@ const restaurantSlice = createSlice({
           error.message || "An error occurred while fetching restaurants.";
       }
     );
+    // Find one restaurant for admin
   },
 });
 

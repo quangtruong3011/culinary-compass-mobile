@@ -1,3 +1,5 @@
+import { CurrentRestaurantState } from "./current-restaurant-state.interface";
+
 export interface CreateOrEditRestaurantFormProps {
   onSubmit: (data: CreateOrEditRestaurantDto) => void;
   isLoading: boolean;
@@ -66,7 +68,7 @@ export interface CreateOrEditRestaurantDto {
 
 export interface RestaurantState {
   restaurants: any;
-  currentRestaurant: any;
+  currentRestaurant: CurrentRestaurantState;
   is_loading: boolean;
   error: string | null;
 }

@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { authApi } from "../api/auth.api";
 import { AuthState } from "../interfaces/auth.interface";
-import { saveAuthTokens } from "../utils/auth.storage";
+import { removeAuthTokens, saveAuthTokens } from "../utils/auth.storage";
 
 const initialState: AuthState = {
   user: null,
@@ -45,6 +45,7 @@ const authSlice = createSlice({
     },
   },
   extraReducers(builder) {
+    // Login
     builder.addMatcher(authApi.endpoints.login.matchPending, (state) => {
       state.is_loading = true;
       state.error = null;
@@ -58,8 +59,6 @@ const authSlice = createSlice({
         state.is_authenticated = true;
 
         authApi.endpoints.getMe.initiate();
-
-        saveAuthTokens(payload.data.access_token, payload.data.refresh_token);
       }
     );
     builder.addMatcher(
@@ -69,6 +68,7 @@ const authSlice = createSlice({
         state.error = (payload as any)?.data?.message || "Login failed";
       }
     );
+    // Get User Profile
     builder.addMatcher(authApi.endpoints.getMe.matchPending, (state) => {
       state.is_loading = true;
       state.error = null;
@@ -78,7 +78,7 @@ const authSlice = createSlice({
       (state, { payload }) => {
         state.is_loading = false;
         state.is_authenticated = true;
-        state.user = payload;
+        state.user = payload.data;
       }
     );
     builder.addMatcher(
@@ -97,17 +97,26 @@ const authSlice = createSlice({
       authApi.endpoints.refreshToken.matchFulfilled,
       (state, { payload }) => {
         state.is_loading = false;
-        state.access_token = payload.access_token;
-        state.refresh_token = payload.refresh_token;
-        state.user = payload.user;
+        state.access_token = payload.data.access_token;
+        state.refresh_token = payload.data.refresh_token;
+        state.user = payload.data.user;
         state.is_authenticated = true;
 
         authApi.endpoints.getMe.initiate();
-        // authApi.util.invalidateTags(["Auth"]);
-
-        saveAuthTokens(payload.access_token, payload.refresh_token);
       }
     );
+    builder.addMatcher(
+      authApi.endpoints.refreshToken.matchRejected,
+      (state, { payload }) => {
+        state.is_loading = false;
+        state.is_authenticated = false;
+        state.error =
+          (payload as any)?.data?.message || "Failed to refresh token";
+
+        removeAuthTokens();
+      }
+    );
+    // Registration
     builder.addMatcher(authApi.endpoints.register.matchPending, (state) => {
       state.is_loading = true;
       state.error = null;
@@ -116,6 +125,8 @@ const authSlice = createSlice({
       authApi.endpoints.register.matchFulfilled,
       (state, { payload }) => {
         state.is_loading = false;
+        state.access_token = payload.data.access_token;
+        state.refresh_token = payload.data.refresh_token;
         state.is_authenticated = true;
 
         saveAuthTokens(payload.data.access_token, payload.data.refresh_token);
@@ -128,6 +139,7 @@ const authSlice = createSlice({
         state.error = (payload as any)?.data?.message || "Registration failed";
       }
     );
+    // Update User Roles
     builder.addMatcher(
       authApi.endpoints.updateUserRoles.matchPending,
       (state) => {

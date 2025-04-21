@@ -13,14 +13,14 @@ export async function saveAuthTokens(
   refreshToken: string
 ): Promise<void> {
   try {
-    if (typeof accessToken !== 'string' || typeof refreshToken !== 'string') {
-      throw new Error('Tokens must be strings');
+    if (typeof accessToken !== "string" || typeof refreshToken !== "string") {
+      throw new Error("Tokens must be strings");
     }
 
     await SecureStore.setItemAsync(TOKEN_KEY, accessToken);
     await SecureStore.setItemAsync(REFRESH_TOKEN_KEY, refreshToken);
   } catch (error) {
-    console.error('Failed to save auth tokens:', error);
+    console.error("Failed to save auth tokens:", error);
     throw error;
   }
 }
@@ -29,13 +29,13 @@ export async function getAuthTokens(): Promise<AuthTokens> {
   try {
     const accessToken = await SecureStore.getItemAsync(TOKEN_KEY);
     const refreshToken = await SecureStore.getItemAsync(REFRESH_TOKEN_KEY);
-    
+
     return {
       accessToken,
-      refreshToken
+      refreshToken,
     };
   } catch (error) {
-    console.error('Failed to get auth tokens:', error);
+    console.error("Failed to get auth tokens:", error);
     throw error;
   }
 }
@@ -45,7 +45,7 @@ export async function removeAuthTokens(): Promise<void> {
     await SecureStore.deleteItemAsync(TOKEN_KEY);
     await SecureStore.deleteItemAsync(REFRESH_TOKEN_KEY);
   } catch (error) {
-    console.error('Failed to remove auth tokens:', error);
+    console.error("Failed to remove auth tokens:", error);
     throw error;
   }
 }

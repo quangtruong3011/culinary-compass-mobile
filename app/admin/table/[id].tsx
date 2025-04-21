@@ -26,11 +26,11 @@ const EditTable = () => {
   return (
     <View>
       <Text style={{ fontSize: 24, fontWeight: 'bold', margin: 16 }}>Edit Table</Text>
-      <CreateOrEditTable
+      {/* <CreateOrEditTable
         initialData={tableData}
         onSave={handleSave}
         onCancel={handleCancel}
-      />
+      /> */}
     </View>
   );
 };

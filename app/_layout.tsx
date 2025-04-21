@@ -17,7 +17,6 @@ import { AuthProvider } from "@/features/auth/context/AuthProvider";
 import { Provider } from "react-redux";
 import { persistor, store } from "@/store/store";
 import { PersistGate } from "redux-persist/integration/react";
-import { useAuth } from "@/features/auth/hooks/useAuth";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { useUserRoles } from "@/features/auth/hooks/useUserRoles";
 
@@ -36,7 +35,7 @@ function MainApp() {
           >
             <Stack screenOptions={{ headerShown: false }}>
               {isAdmin ? (
-                <Stack.Screen name="admin" />
+                <Stack.Screen name="admin/(tabs)" />
               ) : (
                 <Stack.Screen name="user/(tabs)" />
               )}
