@@ -11,7 +11,7 @@ import { RootState } from "@/store/store";
 import { fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 const baseQuery = fetchBaseQuery({
-  baseUrl: "http://192.168.229.99:3000",
+  baseUrl: "http://192.168.1.190:3000",
   prepareHeaders: (headers, { getState }) => {
     const token = (getState() as RootState).auth.access_token;
     if (token) {
@@ -73,7 +73,7 @@ const baseQueryWithReauth = async (args: any, api: any, extraOptions: any) => {
     api.dispatch(clearCredentials());
   }
 
-  console.log("baseQueryWithReauth result", result);
+  console.log("baseQueryWithReauth", result.error?.status, result.error?.data);
   return result;
 };
 

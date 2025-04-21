@@ -15,12 +15,17 @@ import { CreateOrEditTableDto } from "../interfaces/create-or-edit-table.interfa
 import { zodResolver } from "@hookform/resolvers/zod";
 import { tableSchema } from "@/lib/validation/tableSchema";
 import CreateOrEditTableForm from "./CreateOrEditTableForm";
-import { useCreateTableMutation, useFindOneTableQuery } from "../api/table.api";
+import {
+  useCreateTableMutation,
+  useFindOneTableQuery,
+  useUpdateTableMutation,
+} from "../api/table.api";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 import { useEffect } from "react";
+import { Text } from "@/components/ui/text";
 
-const TableFormModal = ({
+const CreateOrEditTableModal = ({
   id,
   isOpen,
   onClose,
@@ -49,34 +54,36 @@ const TableFormModal = ({
   const { data, isFetching } = useFindOneTableQuery(id as number, {
     skip: !id,
   });
+  const [update, { isLoading: isUpdating }] = useUpdateTableMutation();
 
   useEffect(() => {
     if (restaurantId) {
       if (id && data) {
         // EDIT MODE: Cập nhật form với dữ liệu hiện có
         reset({
-          id: data.id,
-          name: data.name,
-          numberOfSeats: data.numberOfSeats,
-          restaurantId: restaurantId,
+          name: data.data.name,
+          numberOfSeats: data.data.numberOfSeats,
+          restaurantId: Number(restaurantId),
         });
       } else {
         // CREATE MODE: Reset form trống
         reset({
           name: "",
           numberOfSeats: 0,
-          restaurantId: restaurantId,
+          restaurantId: Number(restaurantId),
         });
       }
     }
   }, [data, restaurantId, reset, id]);
 
   const onSubmit = async (data: CreateOrEditTableDto) => {
-    console.log(data);
     try {
       if (!id) {
         await create(data).unwrap();
-        // onSuccess?.();
+        onSuccess?.();
+      } else {
+        await update({ id, body: data }).unwrap();
+        onSuccess?.();
       }
       onClose?.();
       reset();
@@ -103,10 +110,15 @@ const TableFormModal = ({
           </ModalCloseButton>
         </ModalHeader>
         <ModalBody>
-          <CreateOrEditTableForm
-            control={control}
-            errors={errors}
-          />
+          {errors && (
+            <Text className="text-red-500 text-sm mb-2" size="sm">
+              {errors.id?.message ||
+                errors.name?.message ||
+                errors.numberOfSeats?.message ||
+                errors.restaurantId?.message}
+            </Text>
+          )}
+          <CreateOrEditTableForm control={control} errors={errors} />
         </ModalBody>
         <ModalFooter>
           <Button variant="outline" action="secondary" onPress={handleCancel}>
@@ -127,4 +139,4 @@ const TableFormModal = ({
   );
 };
 
-export default TableFormModal;
+export default CreateOrEditTableModal;

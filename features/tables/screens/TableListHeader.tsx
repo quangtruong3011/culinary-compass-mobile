@@ -1,22 +1,17 @@
 import { Button, ButtonText } from "@/components/ui/button";
-
 import { useState } from "react";
-import TableFormModal from "./TableFormModal";
+import CreateOrEditTableModal from "./CreateOrEditTableModal";
 
-const TableListHeader = ({ onSuccess }: { onSuccess: () => void }) => {
-  const [isOpen, setIsOpen] = useState(false);
+interface TableListHeaderProps {
+  onPressCreate: () => void;
+}
 
+const TableListHeader = ({ onPressCreate }: TableListHeaderProps) => {
   return (
     <>
-      <Button onPress={() => setIsOpen(true)}>
+      <Button onPress={onPressCreate}>
         <ButtonText>Create</ButtonText>
       </Button>
-
-      <TableFormModal
-        isOpen={isOpen}
-        onClose={() => setIsOpen(false)}
-        onSuccess={onSuccess}
-      />
     </>
   );
 };

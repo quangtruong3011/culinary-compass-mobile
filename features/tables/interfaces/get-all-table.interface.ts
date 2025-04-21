@@ -13,4 +13,5 @@ interface Table {
   name: string;
   restaurantId: number;
   numberOfSeats: number;
+  isAvailable: boolean;
 }
