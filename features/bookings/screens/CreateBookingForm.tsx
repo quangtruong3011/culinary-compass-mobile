@@ -9,13 +9,25 @@ import { useState } from "react";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { useCreateBookingMutation } from "../api/booking.api";
 import { Button, ButtonSpinner, ButtonText } from "@/components/ui/button";
+import { useSelector } from "react-redux";
+import { RootState } from "@/store/store";
+import {useRouter} from "expo-router";
+import { useAuth } from "@/features/auth/hooks/useAuth";
+import { Text } from "@/components/ui/text";
 
 
 const CreateBookingForm = () => {
+  const restaurantId = useSelector((state: RootState) => state.restaurant.currentRestaurant.id);
+  const userId = useSelector((state: RootState) => state.auth.user.id);
+  console.log(userId);
+  const {is_authenticated} = useAuth();
+  const router = useRouter();
+
   const { control, handleSubmit, formState: { errors }, setValue, } = useForm<CreateBookingDto>({
     resolver: zodResolver(bookingSchema),
   });
 
+  
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
 
@@ -36,6 +48,24 @@ const CreateBookingForm = () => {
 
   const [create, { isLoading }] = useCreateBookingMutation();
 
+  const onSubmit = async (data: CreateBookingDto) => {
+    if (!is_authenticated) {
+      router.push("../auth/login");
+    }
+    const bookingData = {
+      ...data,
+      restaurantId: Number(restaurantId),
+      userId: Number(userId),
+    };
+    try {
+      await create(bookingData).unwrap();
+      alert("Booking created successfully!");
+    } catch (error) {
+      alert("Failed to create booking. Please try again.");
+    }
+  };
+
+
   return (
     <VStack>
       <Controller
@@ -53,7 +83,7 @@ const CreateBookingForm = () => {
             <Input className="my-1">
               <InputField
                 type="text"
-                placeholder="Restaurant Name"
+                placeholder="Customer Name"
                 onChangeText={onChange}
                 onBlur={onBlur}
               />
@@ -171,7 +201,7 @@ const CreateBookingForm = () => {
           onChange={(event, selectedDate) => {
             setShowDatePicker(false);
             if (selectedDate) {
-              control.setValue("date", selectedDate);
+              setValue("date", selectedDate);
             }
           }}
         />
@@ -209,6 +239,19 @@ const CreateBookingForm = () => {
           </FormControl>
         )}
       />
+
+      {showTimePicker && (
+        <DateTimePicker
+          mode="time"
+          value={control._formValues.startTime || new Date()}
+          onChange={(event, selectedTime) => {
+            setShowTimePicker(false);
+            if (selectedTime) {
+              setValue("startTime", selectedTime);
+            }
+          }}
+        />
+      )}
 
       <Controller
         name="endTime"
@@ -250,7 +293,7 @@ const CreateBookingForm = () => {
           onChange={(event, selectedTime) => {
             setShowTimePicker(false);
             if (selectedTime) {
-              control.setValue("endTime", selectedTime);
+              setValue("endTime", selectedTime);
             }
           }}
         />
@@ -272,8 +315,9 @@ const CreateBookingForm = () => {
               <InputField
                 type="text"
                 placeholder="Number of Guests"
-                onChangeText={onChange}
+                onChangeText={(text)=> onChange(parseInt(text))} 
                 onBlur={onBlur}
+                //value={value.toString()}
                 keyboardType="numeric"
                 maxLength={2}
               />
@@ -289,12 +333,14 @@ const CreateBookingForm = () => {
         )}
       />
 
-      <Button isDisabled={isLoading} >
+      <Button isDisabled={isLoading}  
+      onPress={handleSubmit(onSubmit)}>
         <ButtonText>Submit</ButtonText>
         {isLoading && <ButtonSpinner animating={isLoading} />}
       </Button>
 
-
+        {errors.restaurantId && (
+          <Text>{errors.restaurantId.message}</Text>)}
     </VStack >
   )
 }

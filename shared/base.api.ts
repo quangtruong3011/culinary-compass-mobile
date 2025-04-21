@@ -11,7 +11,7 @@ import { RootState } from "@/store/store";
 import { fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 const baseQuery = fetchBaseQuery({
-  baseUrl: "http://192.168.229.1:3000",
+  baseUrl: "http://192.131.3.103:3000",
   prepareHeaders: (headers, { getState }) => {
     const token = (getState() as RootState).auth.access_token;
     if (token) {
