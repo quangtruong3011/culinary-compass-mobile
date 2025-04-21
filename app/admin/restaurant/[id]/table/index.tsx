@@ -65,7 +65,6 @@ export default function RestaurantTableScreen() {
         restaurantId={item.restaurantId}
         numberOfSeats={item.numberOfSeats}
         isAvailable={item.isAvailable}
-        onSuccess={handleSuccess}
       />
     ),
     [handleSuccess]
@@ -84,8 +83,8 @@ export default function RestaurantTableScreen() {
   }
 
   const handleEdit = (id: number) => {
-    setIsOpenModal(true);
-  }
+    setTableId(id);
+  };
 
   return (
     <>

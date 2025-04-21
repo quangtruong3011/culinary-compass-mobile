@@ -1,8 +1,14 @@
-import { zodResolver } from "@hookform/resolvers/zod"
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import { bookingSchema } from "@/lib/validation/bookingSchema";
 import { VStack } from "@/components/ui/vstack";
-import { FormControl, FormControlError, FormControlErrorText, FormControlLabel, FormControlLabelText } from "@/components/ui/form-control";
+import {
+  FormControl,
+  FormControlError,
+  FormControlErrorText,
+  FormControlLabel,
+  FormControlLabelText,
+} from "@/components/ui/form-control";
 import { Input, InputField } from "@/components/ui/input";
 import { CreateBookingDto } from "../interfaces/create-booking.interface";
 import { useState } from "react";
@@ -10,21 +16,27 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import { useCreateBookingMutation } from "../api/booking.api";
 import { Button, ButtonSpinner, ButtonText } from "@/components/ui/button";
 
-
 const CreateBookingForm = () => {
-  const { control, handleSubmit, formState: { errors }, setValue, } = useForm<CreateBookingDto>({
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+    setValue,
+  } = useForm<CreateBookingDto>({
     resolver: zodResolver(bookingSchema),
   });
 
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
 
-  const [currentTimeField, setCurrentTimeField] = useState<"startTime" | "endTime">("startTime");
+  const [currentTimeField, setCurrentTimeField] = useState<
+    "startTime" | "endTime"
+  >("startTime");
 
   const handleTimeChange = (field: "startTime" | "endTime") => {
     setCurrentTimeField(field);
     setShowTimePicker(true);
-  }
+  };
 
   const formatTime = (date: Date | undefined) => {
     if (!date) return "hh:mm AM/PM";
@@ -171,7 +183,7 @@ const CreateBookingForm = () => {
           onChange={(event, selectedDate) => {
             setShowDatePicker(false);
             if (selectedDate) {
-              control.setValue("date", selectedDate);
+              setValue("date", selectedDate);
             }
           }}
         />
@@ -250,7 +262,7 @@ const CreateBookingForm = () => {
           onChange={(event, selectedTime) => {
             setShowTimePicker(false);
             if (selectedTime) {
-              control.setValue("endTime", selectedTime);
+              setValue("endTime", selectedTime);
             }
           }}
         />
@@ -289,14 +301,12 @@ const CreateBookingForm = () => {
         )}
       />
 
-      <Button isDisabled={isLoading} >
+      <Button isDisabled={isLoading}>
         <ButtonText>Submit</ButtonText>
         {isLoading && <ButtonSpinner animating={isLoading} />}
       </Button>
-
-
-    </VStack >
-  )
-}
+    </VStack>
+  );
+};
 
 export default CreateBookingForm;
