@@ -3,6 +3,7 @@ import { PaginationOptions } from "@/shared/pagination.interface";
 import { createApi } from "@reduxjs/toolkit/query/react";
 import { CreateOrEditTableDto } from "../interfaces/create-or-edit-table.interface";
 import { GetAllTableResponse } from "../interfaces/get-all-table.interface";
+import { GetTableResponse } from "../interfaces/get-table.interface";
 
 export const tableApi = createApi({
   reducerPath: "tableApi",
@@ -14,7 +15,7 @@ export const tableApi = createApi({
       PaginationOptions
     >({
       query: (options) => ({
-        url: "/tables/find-all-for-admin",
+        url: "/tables",
         method: "GET",
         params: {
           page: options.page,
@@ -41,10 +42,29 @@ export const tableApi = createApi({
         body,
       }),
     }),
-    findOneTable: builder.query<any, number>({
+    findOneTable: builder.query<GetTableResponse, number>({
       query: (id) => ({
         url: `/tables/${id}`,
         method: "GET",
+      }),
+      transformResponse: (response: GetTableResponse) => ({
+        data: {
+          id: response.data.id,
+          name: response.data.name,
+          restaurantId: response.data.restaurantId,
+          numberOfSeats: response.data.numberOfSeats,
+          isAvailable: response.data.isAvailable,
+        },
+      }),
+    }),
+    updateTable: builder.mutation<
+      any,
+      { id: number; body: CreateOrEditTableDto }
+    >({
+      query: ({ id, body }) => ({
+        url: `/tables/${id}`,
+        method: "PATCH",
+        body,
       }),
     }),
   }),
@@ -54,4 +74,5 @@ export const {
   useFindAllTablesForAdminQuery,
   useCreateTableMutation,
   useFindOneTableQuery,
+  useUpdateTableMutation,
 } = tableApi;

@@ -24,7 +24,6 @@ import {
 } from "../interfaces/restaurant.interface";
 import { useState } from "react";
 import { HStack } from "@/components/ui/hstack";
-import { Box } from "@/components/ui/box";
 import { Text } from "@/components/ui/text";
 import { Alert, AlertText } from "@/components/ui/alert";
 import { MAX_IMAGES } from "@/constants/constants";

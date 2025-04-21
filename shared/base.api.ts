@@ -73,7 +73,7 @@ const baseQueryWithReauth = async (args: any, api: any, extraOptions: any) => {
     api.dispatch(clearCredentials());
   }
 
-  console.log("baseQueryWithReauth result", result);
+  console.log("baseQueryWithReauth", result.error?.status, result.error?.data);
   return result;
 };
 

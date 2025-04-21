@@ -1,5 +1,4 @@
-import { Controller, useForm } from "react-hook-form";
-import { CreateOrEditTableDto } from "../interfaces/create-or-edit-table.interface";
+import { Controller } from "react-hook-form";
 import { VStack } from "@/components/ui/vstack";
 import {
   FormControl,
@@ -24,27 +23,6 @@ const CreateOrEditTableForm = ({
 
   return (
     <VStack space="lg">
-      <Controller
-        control={control}
-        name="restaurantId"
-        render={({ field: { onChange, onBlur, value } }) => (
-          <FormControl isDisabled={true}>
-            <FormControlLabel>
-              <FormControlLabelText>Restaurant ID</FormControlLabelText>
-            </FormControlLabel>
-            <Input>
-              <InputField
-                type="text"
-                onChangeText={onChange}
-                onBlur={onBlur}
-                value={value?.toString()}
-                editable={false}
-              />
-            </Input>
-          </FormControl>
-        )}
-      />
-
       <Controller
         control={control}
         name="name"
