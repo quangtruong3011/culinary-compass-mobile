@@ -67,6 +67,12 @@ export const tableApi = createApi({
         body,
       }),
     }),
+    deleteTable: builder.mutation<any, number>({
+      query: (id) => ({
+        url: `/tables/${id}`,
+        method: "DELETE",
+      }),
+    }),
   }),
 });
 
@@ -75,4 +81,5 @@ export const {
   useCreateTableMutation,
   useFindOneTableQuery,
   useUpdateTableMutation,
+  useDeleteTableMutation,
 } = tableApi;

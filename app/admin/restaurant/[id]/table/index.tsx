@@ -1,11 +1,15 @@
 import { Text } from "@/components/ui/text";
 import { Stack } from "expo-router";
 import { ActivityIndicator, FlatList, RefreshControl } from "react-native";
-import { useFindAllTablesForAdminQuery } from "@/features/tables/api/table.api";
+import {
+  useDeleteTableMutation,
+  useFindAllTablesForAdminQuery,
+} from "@/features/tables/api/table.api";
 import { useCallback, useState } from "react";
 import TableListHeader from "@/features/tables/screens/TableListHeader";
 import TableCard from "@/features/tables/screens/TableCard";
 import CreateOrEditTableModal from "@/features/tables/screens/CreateOrEditTableModal";
+import { Box } from "@/components/ui/box";
 
 const PASE_SIZE = 10;
 
@@ -21,6 +25,8 @@ export default function RestaurantTableScreen() {
       limit: PASE_SIZE,
       filterText: "",
     });
+
+  const [remove, { isLoading: isRemoving }] = useDeleteTableMutation();
 
   const tables = data?.data.results || [];
   const totalPages = data?.data.totalPages || 0;
@@ -47,6 +53,25 @@ export default function RestaurantTableScreen() {
     }
   }, [isFetching, hasMoreData]);
 
+  const handleEdit = (id: number) => {
+    setIsOpenModal(true);
+    setTableId(id);
+  };
+
+  const handleCloseModal = () => {
+    setIsOpenModal(false);
+    setTableId(null);
+  };
+
+  const handleDelete = async (id: number) => {
+    try {
+      await remove(id).unwrap();
+      await refetch();
+    } catch (error) {
+      console.error("Failed to delete table: ", error);
+    }
+  };
+
   const renderTableItem = useCallback(
     ({
       item,
@@ -65,9 +90,11 @@ export default function RestaurantTableScreen() {
         restaurantId={item.restaurantId}
         numberOfSeats={item.numberOfSeats}
         isAvailable={item.isAvailable}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
       />
     ),
-    [handleSuccess]
+    []
   );
 
   const renderFooter = useCallback(
@@ -81,10 +108,6 @@ export default function RestaurantTableScreen() {
   if (isLoading && page === 1) {
     return <ActivityIndicator size="large" color="#0000ff" />;
   }
-
-  const handleEdit = (id: number) => {
-    setTableId(id);
-  };
 
   return (
     <>
@@ -102,7 +125,13 @@ export default function RestaurantTableScreen() {
         ListHeaderComponent={
           <TableListHeader onPressCreate={() => setIsOpenModal(true)} />
         }
-        ListEmptyComponent={!isLoading ? <Text>No tables found</Text> : null}
+        ListEmptyComponent={
+          !isLoading ? (
+            <Box>
+              <Text>No tables found</Text>
+            </Box>
+          ) : null
+        }
         ListFooterComponent={renderFooter}
         refreshControl={
           <RefreshControl
@@ -117,8 +146,9 @@ export default function RestaurantTableScreen() {
       />
 
       <CreateOrEditTableModal
+        id={tableId || undefined}
         isOpen={isOpenModal}
-        onClose={() => setIsOpenModal(false)}
+        onClose={handleCloseModal}
         onSuccess={handleSuccess}
       />
     </>

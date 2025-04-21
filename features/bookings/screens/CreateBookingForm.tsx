@@ -15,8 +15,20 @@ import { useState } from "react";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { useCreateBookingMutation } from "../api/booking.api";
 import { Button, ButtonSpinner, ButtonText } from "@/components/ui/button";
+import { useSelector } from "react-redux";
+import { RootState } from "@/store/store";
+import { useRouter } from "expo-router";
+import { useAuth } from "@/features/auth/hooks/useAuth";
+import { Text } from "@/components/ui/text";
 
 const CreateBookingForm = () => {
+  const restaurantId = useSelector(
+    (state: RootState) => state.restaurant.currentRestaurant.id
+  );
+  const userId = useSelector((state: RootState) => state.auth.user?.id);
+  const { is_authenticated } = useAuth();
+  const router = useRouter();
+
   const {
     control,
     handleSubmit,
@@ -48,6 +60,23 @@ const CreateBookingForm = () => {
 
   const [create, { isLoading }] = useCreateBookingMutation();
 
+  const onSubmit = async (data: CreateBookingDto) => {
+    if (!is_authenticated) {
+      router.push("../auth/login");
+    }
+    const bookingData = {
+      ...data,
+      restaurantId: Number(restaurantId),
+      userId: Number(userId),
+    };
+    try {
+      await create(bookingData).unwrap();
+      alert("Booking created successfully!");
+    } catch (error) {
+      alert("Failed to create booking. Please try again.");
+    }
+  };
+
   return (
     <VStack>
       <Controller
@@ -65,7 +94,7 @@ const CreateBookingForm = () => {
             <Input className="my-1">
               <InputField
                 type="text"
-                placeholder="Restaurant Name"
+                placeholder="Customer Name"
                 onChangeText={onChange}
                 onBlur={onBlur}
               />
@@ -222,6 +251,19 @@ const CreateBookingForm = () => {
         )}
       />
 
+      {showTimePicker && (
+        <DateTimePicker
+          mode="time"
+          value={control._formValues.startTime || new Date()}
+          onChange={(event, selectedTime) => {
+            setShowTimePicker(false);
+            if (selectedTime) {
+              setValue("startTime", selectedTime);
+            }
+          }}
+        />
+      )}
+
       <Controller
         name="endTime"
         control={control}
@@ -284,8 +326,9 @@ const CreateBookingForm = () => {
               <InputField
                 type="text"
                 placeholder="Number of Guests"
-                onChangeText={onChange}
+                onChangeText={(text) => onChange(parseInt(text))}
                 onBlur={onBlur}
+                //value={value.toString()}
                 keyboardType="numeric"
                 maxLength={2}
               />

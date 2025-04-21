@@ -40,7 +40,7 @@ const CreateOrEditTableModal = ({
   const restaurantId = useSelector(
     (state: RootState) => state.restaurant.currentRestaurant.id
   );
-
+  console.log("id", id);
   const {
     control,
     reset,

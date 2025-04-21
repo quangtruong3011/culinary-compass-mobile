@@ -1,15 +1,12 @@
-import { Card } from "@/components/ui/card";
-import { Heading } from "@/components/ui/heading";
 import { HStack } from "@/components/ui/hstack";
 import { VStack } from "@/components/ui/vstack";
 import { Text } from "@/components/ui/text";
 import { Badge, BadgeText } from "@/components/ui/badge";
 import { Box } from "@/components/ui/box";
 import { Menu, MenuItem, MenuItemLabel } from "@/components/ui/menu";
-import { Button, ButtonIcon, ButtonText } from "@/components/ui/button";
+import { Button, ButtonIcon } from "@/components/ui/button";
 import { EditIcon, Icon, MenuIcon, TrashIcon } from "@/components/ui/icon";
-import { useState } from "react";
-import TableFormModal from "./CreateOrEditTableModal";
+import { Alert, StyleSheet } from "react-native";
 
 type TableStatus = "Available" | "Occupied";
 
@@ -32,15 +29,31 @@ const TableCard = ({
   onEdit,
   onDelete,
 }: TableCardProps) => {
-  const [isOpen, setIsOpen] = useState(false);
   const status: TableStatus = isAvailable ? "Available" : "Occupied";
   const statusColor = isAvailable ? "success" : "error";
 
   const handleEdit = () => onEdit?.(id);
-  const handleDelete = () => onDelete?.(id);
+  const handleDelete = () => {
+    Alert.alert(
+      "Are you sure?",
+      `Are you sure you want to delete table ${name}?`,
+
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "OK",
+          onPress: () => onDelete?.(id),
+        },
+      ],
+      { cancelable: false }
+    );
+  };
 
   return (
-    <Box>
+    <Box style={styles.box}>
       <HStack className="justify-between items-center">
         <VStack space="xs">
           <Text
@@ -76,22 +89,27 @@ const TableCard = ({
             <Icon as={EditIcon} size="sm" className="mr-2" />
             <MenuItemLabel size="sm">Edit</MenuItemLabel>
           </MenuItem>
-          <MenuItem key="Delete" textValue="Delete">
+          <MenuItem key="Delete" textValue="Delete" onPress={handleDelete}>
             <Icon as={TrashIcon} size="sm" className="mr-2" />
             <MenuItemLabel size="sm">Delete</MenuItemLabel>
           </MenuItem>
         </Menu>
       </HStack>
-      {/* <TableFormModal
-        isOpen={isOpen}
-        onClose={() => setIsOpen(false)}
-        id={id}
-        onSuccess={() => {
-          setIsOpen(false);
-          onSuccess?.();
-        }}
-      /> */}
     </Box>
   );
 };
 export default TableCard;
+
+const styles = StyleSheet.create({
+  box: {
+    padding: 16,
+    borderRadius: 8,
+    backgroundColor: "#fff",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+    marginBottom: 8,
+  },
+});
