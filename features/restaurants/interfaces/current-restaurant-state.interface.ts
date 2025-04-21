@@ -1,3 +1,3 @@
 export interface CurrentRestaurantState {
-  id: number;
+  id: number | null;
 }
