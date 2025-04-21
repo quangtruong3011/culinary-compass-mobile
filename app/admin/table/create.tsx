@@ -9,8 +9,8 @@ const CreateTable = () => {
     const router = useRouter();
     const [createTable, { isLoading }] = useCreateTableMutation();
 
-    const handleSave = (data: { name: string; capacity: number }) => {
-        createTable(data, ).unwrap().then(() => {
+    const handleSave = (data: { name: string; capacity: number; restaurantId: number }) => {
+        createTable(data).unwrap().then(() => {
             router.push("/admin/table");
         });
     };
@@ -21,9 +21,11 @@ const CreateTable = () => {
     return (
         <View>
             <Text style={{ fontSize: 24, fontWeight: 'bold', margin: 16 }}>Create Table</Text>
-            {/* <CreateOrEditTable
-                onSave={handleSave} onCancel={handleCancel} restaurantId={}
-            /> */}
+            <CreateOrEditTable
+                onSave={(data) => handleSave({ ...data, restaurantId: 1 })} 
+                onCancel={handleCancel} 
+                restaurantId={1}
+            />
         </View>
     )
 }
