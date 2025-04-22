@@ -8,9 +8,6 @@ import { Text } from "@/components/ui/text";
 import { VStack } from "@/components/ui/vstack";
 import { Ionicons } from "@expo/vector-icons";
 import { StyleSheet } from "react-native";
-import { View } from "react-native";
-import { Select } from "@/components/ui/select";
-import SelectTable from "@/app/user/booking/selectTable";
 import CreateBookingForm from "@/features/bookings/screens/CreateBookingForm";
 
 interface RestaurantDetailForUserProps {

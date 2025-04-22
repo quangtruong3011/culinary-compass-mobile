@@ -7,6 +7,7 @@ import { userApi } from "@/features/users/api/user.api";
 import { restaurantApi } from "@/features/restaurants/api/restaurant.api";
 import { restaurantReducer } from "@/features/restaurants/store/restaurant.slice";
 import { tableApi } from "@/features/tables/api/table.api";
+import { bookingApi } from "@/features/bookings/api/booking.api";
 
 const persistConfig = {
   key: "root",
@@ -21,6 +22,7 @@ const rootReducer = combineReducers({
   [restaurantApi.reducerPath]: restaurantApi.reducer,
   restaurant: restaurantReducer,
   [tableApi.reducerPath]: tableApi.reducer,
+  [bookingApi.reducerPath]: bookingApi.reducer,
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
@@ -32,7 +34,7 @@ export const store = configureStore({
       serializableCheck: {
         ignoredActions: ["persist/PERSIST"],
       },
-    }).concat(authApi.middleware, userApi.middleware, restaurantApi.middleware, tableApi.middleware),
+    }).concat(authApi.middleware, userApi.middleware, restaurantApi.middleware, tableApi.middleware, bookingApi.middleware),
 
   // devTools: process.env.NODE_ENV !== "production",
 });

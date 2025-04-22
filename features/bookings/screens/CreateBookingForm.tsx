@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/form-control";
 import { Input, InputField } from "@/components/ui/input";
 import { CreateBookingDto } from "../interfaces/create-booking.interface";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { useCreateBookingMutation } from "../api/booking.api";
 import { Button, ButtonSpinner, ButtonText } from "@/components/ui/button";
@@ -25,8 +25,9 @@ const CreateBookingForm = () => {
   const restaurantId = useSelector(
     (state: RootState) => state.restaurant.currentRestaurant.id
   );
-  const userId = useSelector((state: RootState) => state.auth.user?.id);
-  const { is_authenticated } = useAuth();
+  const { is_authenticated, user } = useAuth();
+  const userId = user?.id;
+
   const router = useRouter();
 
   const {
@@ -34,9 +35,36 @@ const CreateBookingForm = () => {
     handleSubmit,
     formState: { errors },
     setValue,
+    reset,
   } = useForm<CreateBookingDto>({
     resolver: zodResolver(bookingSchema),
+    // defaultValues: {
+    //   userId: Number(userId),
+    //   restaurantId: Number(restaurantId),
+    //   name: "",
+    //   phone: "",
+    //   email: "",
+    //   date: new Date(),
+    //   startTime: new Date(),
+    //   endTime: new Date(),
+    //   guests: 0,
+    // },
+
   });
+
+  useEffect(() => {
+    reset({
+      userId: Number(userId),
+      restaurantId: Number(restaurantId),
+      name: "",
+      phone: "",
+      email: "",
+      date: new Date(),
+      startTime: new Date(),
+      endTime: new Date(),
+      guests: 0,
+    });
+  }, [userId, restaurantId, reset]);
 
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
@@ -64,13 +92,9 @@ const CreateBookingForm = () => {
     if (!is_authenticated) {
       router.push("../auth/login");
     }
-    const bookingData = {
-      ...data,
-      restaurantId: Number(restaurantId),
-      userId: Number(userId),
-    };
+
     try {
-      await create(bookingData).unwrap();
+      await create(data).unwrap();
       alert("Booking created successfully!");
     } catch (error) {
       alert("Failed to create booking. Please try again.");
@@ -79,6 +103,16 @@ const CreateBookingForm = () => {
 
   return (
     <VStack>
+      <Text>
+        {errors.name?.message ||
+          errors.phone?.message ||
+          errors.email?.message ||
+          errors.date?.message ||
+          errors.startTime?.message ||
+          errors.endTime?.message ||
+          errors.guests?.message
+        }
+      </Text>
       <Controller
         name="name"
         control={control}
@@ -126,8 +160,11 @@ const CreateBookingForm = () => {
               <InputField
                 type="text"
                 placeholder="Phone Number"
-                onChangeText={onChange}
+                onChangeText={(text) => onChange(text.replace(/[^0-9]/g, ""))}
                 onBlur={onBlur}
+                value={value}
+                keyboardType="phone-pad"
+                maxLength={10}
               />
             </Input>
             {errors.phone && (
@@ -146,7 +183,7 @@ const CreateBookingForm = () => {
         control={control}
         render={({ field: { onChange, onBlur, value } }) => (
           <FormControl
-            isInvalid={!!errors.email}
+            // isInvalid={!!errors.email}
             isRequired={false}
             isDisabled={isLoading}
           >
@@ -326,9 +363,9 @@ const CreateBookingForm = () => {
               <InputField
                 type="text"
                 placeholder="Number of Guests"
-                onChangeText={(text) => onChange(parseInt(text))}
+                onChangeText={(text) => onChange(parseInt(text) || 0)}
                 onBlur={onBlur}
-                //value={value.toString()}
+                value={value?.toString()}
                 keyboardType="numeric"
                 maxLength={2}
               />
@@ -344,7 +381,7 @@ const CreateBookingForm = () => {
         )}
       />
 
-      <Button isDisabled={isLoading}>
+      <Button isDisabled={isLoading} onPress={handleSubmit(onSubmit)}>
         <ButtonText>Submit</ButtonText>
         {isLoading && <ButtonSpinner animating={isLoading} />}
       </Button>

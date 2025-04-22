@@ -1,4 +1,6 @@
 export interface CreateBookingDto {
+    userId: number;
+    restaurantId: number;
     name: string;
     phone: string;
     email?: string;
@@ -6,5 +8,4 @@ export interface CreateBookingDto {
     startTime: Date;
     endTime: Date;
     guests: number;
-    restaurantId: number;
 }

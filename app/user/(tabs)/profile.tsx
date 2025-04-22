@@ -3,13 +3,14 @@ import { Avatar } from "@/components/ui/avatar";
 import { Button, ButtonText } from "@/components/ui/button";
 import { HStack } from "@/components/ui/hstack";
 import { IconSymbol } from "@/components/ui/IconSymbol";
+import { LinkText } from "@/components/ui/link";
 import { Text } from "@/components/ui/text";
 import { VStack } from "@/components/ui/vstack";
 import { useUpdateUserRolesMutation } from "@/features/auth/api/auth.api";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { useUserRoles } from "@/features/auth/hooks/useUserRoles";
 import { getAuthTokens } from "@/features/auth/utils/auth.storage";
-import { useRouter } from "expo-router";
+import { Link, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 
 export default function UserProfile() {
@@ -80,6 +81,10 @@ export default function UserProfile() {
               <ButtonText>Open Restaurant</ButtonText>
             </Button>
           )}
+
+          <Button onPress={() => router.push("/user/booking")}>
+            <ButtonText>My Bookings</ButtonText>
+          </Button>
 
           <Button onPress={() => logout()}>
             <ButtonText>Logout</ButtonText>

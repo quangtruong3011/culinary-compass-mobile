@@ -76,7 +76,7 @@ const CreateOrEditTableForm = ({
                 onChangeText={(text) => onChange(parseInt(text) || 0)}
                 onBlur={onBlur}
                 value={value?.toString()}
-                keyboardType="numeric"
+                keyboardType="phone-pad"
                 ref={numberOfSeatsRef}
               />
             </Input>
