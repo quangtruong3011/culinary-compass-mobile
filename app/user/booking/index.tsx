@@ -1,39 +1,49 @@
-import { Stack } from 'expo-router';
-import { FlatList, Text } from 'react-native';
+import { useAuth } from "@/features/auth/hooks/useAuth";
+import { useGetBookingsByUserQuery } from "@/features/bookings/api/booking.api";
+import BookingCardForUser from "@/features/bookings/screens/BookingCardForUser";
+import BookingListHeader from "@/features/bookings/screens/BookingListHeader";
+import { useState } from "react";
+import { FlatList, Text } from "react-native";
+
+const PASE_SIZE = 10;
 
 export default function BookingScreen() {
-    const data = [
-        { id: 1, name: 'Booking 1' },
-        { id: 2, name: 'Booking 2' },
-        { id: 3, name: 'Booking 3' },
-        { id: 4, name: 'Booking 4' },
-        { id: 5, name: 'Booking 5' },
-    ]
-    const renderHeaderList = ({ item }: {
-        item: { id: number; name: string; };
+  const [page, setPage] = useState(1);
+  const [isManualRefreshing, setIsManualRefreshing] = useState(false);
+  const [isOpenModal, setIsOpenModal] = useState(false);
+  const [userId, setUserId] = useState<number | null>(null);
+  const [bookingId, setBookingId] = useState<number | null>(null);
 
-    }) => {
-        return (
-            <>
-                <Stack.Screen
-                    options={{
-                        headerTitle: "My Bookings",
-                        headerShown: true,
-                    }}
-                />
-            </>
-        )
-    }
-    return (
-        <>
-            <FlatList
-                data={data}
-                keyExtractor={(item) => item.id.toString()}
-                renderItem={({ item }) => (
-                    <Text>{item.name}</Text>
-                )}
-                ListHeaderComponent={renderHeaderList}
-            />
-        </>
-    )
+  const { user } = useAuth();
+
+  const { data, isLoading, isError, refetch, isFetching } =
+    useGetBookingsByUserQuery({
+      page: page,
+      limit: PASE_SIZE,
+      filterText: "",
+      userId: user?.id as number,
+    });
+
+  const bookings = data?.data.results || [];
+
+  return (
+    <>
+      <FlatList
+        data={bookings}
+        keyExtractor={(item) => item.id.toString()}
+        renderItem={({ item }) => (
+          <BookingCardForUser
+            id={item.id}
+            restaurantId={item.restaurantId}
+            date={item.date}
+            startTime={item.startTime}
+            endTime={item.endTime}
+            numberOfSeats={item.guests}
+            isConfirmed={item.isConfirmed}
+          />
+        )}
+        ListHeaderComponent={BookingListHeader}
+      />
+    </>
+  );
 }

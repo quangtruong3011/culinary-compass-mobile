@@ -1,5 +1,5 @@
 import { useFindRestaurantForUserQuery } from "../api/restaurant.api";
-import { ScrollView } from "react-native";
+import { Alert, ScrollView } from "react-native";
 import { Box } from "@/components/ui/box";
 import { HStack } from "@/components/ui/hstack";
 import { Heading } from "@/components/ui/heading";
@@ -8,7 +8,9 @@ import { Text } from "@/components/ui/text";
 import { VStack } from "@/components/ui/vstack";
 import { Ionicons } from "@expo/vector-icons";
 import { StyleSheet } from "react-native";
-import CreateBookingForm from "@/features/bookings/screens/CreateBookingForm";
+import CreateBookingForm from "@/features/bookings/screens/CreateOrEditBookingForm";
+import { useCreateBookingMutation } from "@/features/bookings/api/booking.api";
+import { CreateOrEditBookingDto } from "@/features/bookings/interfaces/create-or-edit-booking.interface";
 
 interface RestaurantDetailForUserProps {
   id: string;
@@ -16,8 +18,19 @@ interface RestaurantDetailForUserProps {
 
 const RestaurantDetailForUser = ({ id }: RestaurantDetailForUserProps) => {
   const { data, isLoading, isError } = useFindRestaurantForUserQuery(id);
+  const [createBooking, { isLoading: isCreating }] = useCreateBookingMutation();
+
+  const handleCreateBooking = async (formData: CreateOrEditBookingDto) => {
+    try {
+      await createBooking(formData).unwrap();
+      Alert.alert("Success", "Booking created successfully");
+    } catch (e) {
+      console.log(e);
+    }
+  };
 
   const restaurant = data?.data;
+
   return (
     <ScrollView>
       <Box style={styles.box}>
@@ -50,7 +63,10 @@ const RestaurantDetailForUser = ({ id }: RestaurantDetailForUserProps) => {
         >
           <Heading size="md">Booking</Heading>
         </HStack>
-        <CreateBookingForm />
+        <CreateBookingForm
+          onSubmit={handleCreateBooking}
+          isLoading={isCreating}
+        />
       </Box>
     </ScrollView>
   );

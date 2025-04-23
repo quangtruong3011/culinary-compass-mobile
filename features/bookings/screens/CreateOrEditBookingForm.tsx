@@ -10,25 +10,32 @@ import {
   FormControlLabelText,
 } from "@/components/ui/form-control";
 import { Input, InputField } from "@/components/ui/input";
-import { CreateBookingDto } from "../interfaces/create-booking.interface";
 import { useEffect, useState } from "react";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { useCreateBookingMutation } from "../api/booking.api";
 import { Button, ButtonSpinner, ButtonText } from "@/components/ui/button";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
-import { useRouter } from "expo-router";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { Text } from "@/components/ui/text";
+import { CreateOrEditBookingDto } from "../interfaces/create-or-edit-booking.interface";
+import moment from "moment";
 
-const CreateBookingForm = () => {
+interface CreateOrEditBookingProps {
+  isLoading: boolean;
+  initialValues?: Partial<CreateOrEditBookingDto>;
+  onSubmit: (data: CreateOrEditBookingDto) => void;
+}
+
+const CreateOrEditBookingForm = ({
+  isLoading,
+  initialValues,
+  onSubmit,
+}: CreateOrEditBookingProps) => {
   const restaurantId = useSelector(
     (state: RootState) => state.restaurant.currentRestaurant.id
   );
   const { is_authenticated, user } = useAuth();
   const userId = user?.id;
-
-  const router = useRouter();
 
   const {
     control,
@@ -36,35 +43,39 @@ const CreateBookingForm = () => {
     formState: { errors },
     setValue,
     reset,
-  } = useForm<CreateBookingDto>({
+  } = useForm<CreateOrEditBookingDto>({
     resolver: zodResolver(bookingSchema),
-    // defaultValues: {
-    //   userId: Number(userId),
-    //   restaurantId: Number(restaurantId),
-    //   name: "",
-    //   phone: "",
-    //   email: "",
-    //   date: new Date(),
-    //   startTime: new Date(),
-    //   endTime: new Date(),
-    //   guests: 0,
-    // },
-
   });
 
   useEffect(() => {
-    reset({
-      userId: Number(userId),
-      restaurantId: Number(restaurantId),
-      name: "",
-      phone: "",
-      email: "",
-      date: new Date(),
-      startTime: new Date(),
-      endTime: new Date(),
-      guests: 0,
-    });
-  }, [userId, restaurantId, reset]);
+    if (initialValues) {
+      reset({
+        ...initialValues,
+        userId: Number(userId),
+        restaurantId: Number(restaurantId),
+        date: initialValues.date ? new Date(initialValues.date) : new Date(),
+        startTime: initialValues.startTime
+          ? new Date(initialValues.startTime)
+          : new Date(),
+        endTime: initialValues.endTime
+          ? new Date(initialValues.endTime)
+          : new Date(),
+        guests: Number(initialValues.guests),
+      });
+    } else {
+      reset({
+        userId: Number(userId),
+        restaurantId: Number(restaurantId),
+        name: "",
+        phone: "",
+        email: "",
+        date: new Date(),
+        startTime: new Date(),
+        endTime: new Date(),
+        guests: 0,
+      });
+    }
+  }, [initialValues, reset]);
 
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
@@ -79,40 +90,11 @@ const CreateBookingForm = () => {
   };
 
   const formatTime = (date: Date | undefined) => {
-    if (!date) return "hh:mm AM/PM";
-    return date.toLocaleTimeString([], {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
-
-  const [create, { isLoading }] = useCreateBookingMutation();
-
-  const onSubmit = async (data: CreateBookingDto) => {
-    if (!is_authenticated) {
-      router.push("../auth/login");
-    }
-
-    try {
-      await create(data).unwrap();
-      alert("Booking created successfully!");
-    } catch (error) {
-      alert("Failed to create booking. Please try again.");
-    }
+    return date ? moment(date).format("hh:mm A") : "";
   };
 
   return (
     <VStack>
-      <Text>
-        {errors.name?.message ||
-          errors.phone?.message ||
-          errors.email?.message ||
-          errors.date?.message ||
-          errors.startTime?.message ||
-          errors.endTime?.message ||
-          errors.guests?.message
-        }
-      </Text>
       <Controller
         name="name"
         control={control}
@@ -131,6 +113,7 @@ const CreateBookingForm = () => {
                 placeholder="Customer Name"
                 onChangeText={onChange}
                 onBlur={onBlur}
+                value={value}
               />
             </Input>
             {errors.name && (
@@ -183,7 +166,7 @@ const CreateBookingForm = () => {
         control={control}
         render={({ field: { onChange, onBlur, value } }) => (
           <FormControl
-            // isInvalid={!!errors.email}
+            isInvalid={!!errors.email}
             isRequired={false}
             isDisabled={isLoading}
           >
@@ -196,6 +179,7 @@ const CreateBookingForm = () => {
                 placeholder="Email Address"
                 onChangeText={onChange}
                 onBlur={onBlur}
+                value={value}
               />
             </Input>
             {errors.email && (
@@ -227,7 +211,7 @@ const CreateBookingForm = () => {
                 placeholder="dd/mm/yyyy"
                 onChangeText={onChange}
                 onBlur={onBlur}
-                value={value ? value.toLocaleDateString() : ""}
+                value={value ? moment(value).format("DD/MM/YYYY") : ""}
                 onPressIn={() => setShowDatePicker(true)}
               />
             </Input>
@@ -385,8 +369,10 @@ const CreateBookingForm = () => {
         <ButtonText>Submit</ButtonText>
         {isLoading && <ButtonSpinner animating={isLoading} />}
       </Button>
+
+      {errors.restaurantId && <Text>{errors.restaurantId.message}</Text>}
     </VStack>
   );
 };
 
-export default CreateBookingForm;
+export default CreateOrEditBookingForm;

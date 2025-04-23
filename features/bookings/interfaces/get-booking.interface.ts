@@ -1,11 +1,14 @@
-export interface CreateBookingDto {
-    userId: number;
+export interface GetBooking {
+  data: {
+    id: number;
     restaurantId: number;
     name: string;
     phone: string;
-    email?: string;
+    email: string;
     date: Date;
     startTime: Date;
     endTime: Date;
     guests: number;
+    isConfirmed: boolean;
+  };
 }

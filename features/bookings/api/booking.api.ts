@@ -1,20 +1,18 @@
 import { BASE_URL } from "@/constants/constants";
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { RootState } from "@/store/store";
-import {
-  Booking,
-  PaginationOptions,
-  PaginationResult,
-  UpdateBookingDto,
-} from "../interfaces/booking.interface";
+import { Booking } from "../interfaces/booking.interface";
 import baseQueryWithReauth from "@/shared/base.api";
-import { CreateBookingDto } from "../interfaces/create-booking.interface";
+import { CreateOrEditBookingDto } from "../interfaces/create-or-edit-booking.interface";
+import { GetAllBookingForUser } from "../interfaces/get-all-booking-for-user";
+import { BookingParam } from "../interfaces/booking-param.interface";
+import { GetBooking } from "../interfaces/get-booking.interface";
 
 export const bookingApi = createApi({
   reducerPath: "bookingApi",
   baseQuery: baseQueryWithReauth,
   endpoints: (builder) => ({
-    createBooking: builder.mutation<any, CreateBookingDto>({
+    createBooking: builder.mutation<any, CreateOrEditBookingDto>({
       query: (body) => ({
         url: "/bookings",
         method: "POST",
@@ -31,34 +29,43 @@ export const bookingApi = createApi({
     //     providesTags: ["Booking"],
     //   }),
 
-    //   getBookingsByUser: builder.query<
-    //     PaginationResult<Booking>,
-    //     { userId: number; options?: PaginationOptions }
-    //   >({
-    //     query: ({ userId, options }) => ({
-    //       url: `/bookings/user/${userId}`,
-    //       method: "GET",
-    //       params: options,
-    //     }),
-    //     providesTags: ["Booking"],
-    //   }),
+    getBookingsByUser: builder.query<GetAllBookingForUser, BookingParam>({
+      query: (options: BookingParam) => ({
+        url: `/bookings/user`,
+        method: "GET",
+        params: {
+          page: options.page,
+          limit: options.limit,
+          filterText: options.filterText,
+          userId: options.userId,
+        },
+      }),
+      transformResponse: (response: any) => {
+        return response;
+      },
+    }),
 
-    //   getBookingDetail: builder.query<Booking, number>({
-    //     query: (id) => ({
-    //       url: `/bookings/${id}`,
-    //       method: "GET",
-    //     }),
-    //     providesTags: (result, error, id) => [{ type: "Booking", id }],
-    //   }),
+    findBookingForUser: builder.query<GetBooking, number>({
+      query: (id) => ({
+        url: `/bookings/${id}`,
+        method: "GET",
+      }),
 
-    //   updateBooking: builder.mutation<Booking, { id: number; data: UpdateBookingDto }>({
-    //     query: ({ id, data }) => ({
-    //       url: `/bookings/${id}`,
-    //       method: "PATCH",
-    //       body: data,
-    //     }),
-    //     invalidatesTags: (result, error, { id }) => [{ type: "Booking", id }],
-    //   }),
+      transformResponse: (response: any) => {
+        return response;
+      },
+    }),
+
+    updateBooking: builder.mutation<
+      any,
+      { id: number; data: CreateOrEditBookingDto }
+    >({
+      query: ({ id, data }) => ({
+        url: `/bookings/${id}`,
+        method: "PATCH",
+        body: data,
+      }),
+    }),
 
     //   deleteBooking: builder.mutation<void, number>({
     //     query: (id) => ({
@@ -73,8 +80,8 @@ export const bookingApi = createApi({
 export const {
   useCreateBookingMutation,
   // useGetAllBookingsQuery,
-  // useGetBookingsByUserQuery,
-  // useGetBookingDetailQuery,
-  // useUpdateBookingMutation,
+  useGetBookingsByUserQuery,
+  useFindBookingForUserQuery,
+  useUpdateBookingMutation,
   // useDeleteBookingMutation,
 } = bookingApi;
