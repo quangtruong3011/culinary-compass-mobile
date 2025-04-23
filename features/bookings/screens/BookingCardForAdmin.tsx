@@ -11,38 +11,46 @@ import moment from "moment";
 import { useDispatch, useSelector } from "react-redux";
 import { setCurrentBooking } from "../store/booking.slice";
 import { RootState } from "@/store/store";
-import { useFindBookingForUserQuery } from "../api/booking.api";
+import { useConfirmBookingMutation, useGetAllBookingsQuery } from "../api/booking.api";
+import { BookingParam } from "../interfaces/booking-param.interface";
 
-interface BookingListForUserProps {
+interface BookingListForAdminProps {
   id: number;
-  restaurantId: number;
-  date: Date;
-  startTime: Date;
-  endTime: Date;
-  numberOfSeats: number;
-  isConfirmed: boolean;
+    restaurantId: number;
+    date: Date;
+    startTime: Date;
+    endTime: Date;
+    numberOfSeats: number;
+    isConfirmed: boolean;
 }
-const BookingCardForUser = ({
+
+const BookingCardForAdmin = ({
   id,
-  restaurantId,
-  date,
-  startTime,
-  endTime,
-  numberOfSeats,
-  isConfirmed,
-}: BookingListForUserProps) => {
+    restaurantId,
+    date,
+    startTime,
+    endTime,
+    numberOfSeats,
+    isConfirmed,
+}: BookingListForAdminProps) => {
   const router = useRouter();
   const dispatch = useDispatch();
+  const [confirmBooking, {isLoading}] = useConfirmBookingMutation();
 
   const restaurant = useSelector(
     (state: any) => state.restaurant.restaurants.find((r: any) => r.id === restaurantId));
 
-  const { data } = useFindBookingForUserQuery(id as number);
+  const { data } = useGetAllBookingsQuery();
 
-  const handleEditPress = () => {
-    dispatch(setCurrentBooking(data?.data));
-    router.push(`../user/booking/${id}`);
-  };
+  const handleConfirmPress = async () => {
+    try {
+      await confirmBooking(id).unwrap();
+      console.log("Booking confirmed successfully");
+    } catch (error) {
+      console.error("Failed to confirm booking:", error);
+    }
+  }
+
 
   return (
     <Box style={styles.box}>
@@ -66,25 +74,24 @@ const BookingCardForUser = ({
           </Text>
         </VStack>
         <HStack space="xs">
-          <Button variant="outline" onPress={handleEditPress}>
+          <Button variant="outline" onPress={handleConfirmPress} disabled={isLoading}>
             <ButtonIcon as={EditIcon} size="sm" />
-            <ButtonText>Edit</ButtonText>
+            <ButtonText>{isLoading ? "Confirming..." : "Confirm"}</ButtonText>
           </Button>
-          <Button
-            variant="solid"
-            style={{ backgroundColor: "red" }}
-            onPress={() => console.log("Cancel booking")}
-          >
-            <ButtonIcon as={TrashIcon} size="sm" />
-            <ButtonText>Cancel</ButtonText>
-          </Button>
+            <Button
+                variant="solid"
+                style={{ backgroundColor: "red" }}
+                onPress={() => console.log("Cancel booking")}
+            >
+                <ButtonIcon as={TrashIcon} size="sm" />
+                <ButtonText>Cancel</ButtonText>
+            </Button>
         </HStack>
       </HStack>
     </Box>
   );
 };
-
-export default BookingCardForUser;
+export default BookingCardForAdmin;
 
 const styles = StyleSheet.create({
   box: {

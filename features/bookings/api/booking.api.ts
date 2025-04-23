@@ -7,6 +7,7 @@ import { CreateOrEditBookingDto } from "../interfaces/create-or-edit-booking.int
 import { GetAllBookingForUser } from "../interfaces/get-all-booking-for-user";
 import { BookingParam } from "../interfaces/booking-param.interface";
 import { GetBooking } from "../interfaces/get-booking.interface";
+import { GetAllBooking } from "../interfaces/get-all-booking.interface";
 
 export const bookingApi = createApi({
   reducerPath: "bookingApi",
@@ -20,14 +21,19 @@ export const bookingApi = createApi({
       }),
     }),
 
-    //   getAllBookings: builder.query<PaginationResult<Booking>, PaginationOptions>({
-    //     query: (params) => ({
-    //       url: "/bookings",
-    //       method: "GET",
-    //       params,
-    //     }),
-    //     providesTags: ["Booking"],
-    //   }),
+      getAllBookings: builder.query<GetAllBooking, void>({
+        query: () => ({
+          url: "/bookings",
+          method: "GET",
+          params: {
+            page: 1,
+            limit: 10,
+          },
+        }),
+        transformResponse: (response: any) => {
+          return response;
+        },
+      }),
 
     getBookingsByUser: builder.query<GetAllBookingForUser, BookingParam>({
       query: (options: BookingParam) => ({
@@ -59,12 +65,22 @@ export const bookingApi = createApi({
     updateBooking: builder.mutation<
       any,
       { id: number; data: CreateOrEditBookingDto }
-    >({
+      >({
       query: ({ id, data }) => ({
         url: `/bookings/${id}`,
         method: "PATCH",
         body: data,
       }),
+    }),
+
+    confirmBooking: builder.mutation<any, number>({
+      query: (id) => ({
+        url: `/bookings/confirm/${id}`,
+        method: "PATCH",
+      }),
+      transformResponse: (response: any) => {
+        return response;
+      },
     }),
 
     //   deleteBooking: builder.mutation<void, number>({
@@ -79,9 +95,10 @@ export const bookingApi = createApi({
 
 export const {
   useCreateBookingMutation,
-  // useGetAllBookingsQuery,
+  useGetAllBookingsQuery,
   useGetBookingsByUserQuery,
   useFindBookingForUserQuery,
   useUpdateBookingMutation,
+  useConfirmBookingMutation,
   // useDeleteBookingMutation,
 } = bookingApi;

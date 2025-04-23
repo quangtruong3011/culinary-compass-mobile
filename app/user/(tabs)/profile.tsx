@@ -86,6 +86,11 @@ export default function UserProfile() {
             <ButtonText>My Bookings</ButtonText>
           </Button>
 
+          <Button onPress={() => router.push("../admin/booking")}>
+            <ButtonText>Confirm Booking</ButtonText>
+          </Button>
+
+
           <Button onPress={() => logout()}>
             <ButtonText>Logout</ButtonText>
           </Button>
