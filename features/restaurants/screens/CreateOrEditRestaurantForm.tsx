@@ -16,19 +16,17 @@ import { Button, ButtonSpinner, ButtonText } from "@/components/ui/button";
 import * as ImagePicker from "expo-image-picker";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import {
-  CreateOrEditRestaurantDto,
-  CreateOrEditRestaurantFormProps,
   Districts,
   Provinces,
   Wards,
 } from "../interfaces/restaurant.interface";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { HStack } from "@/components/ui/hstack";
 import { Text } from "@/components/ui/text";
 import { Alert, AlertText } from "@/components/ui/alert";
 import { MAX_IMAGES } from "@/constants/constants";
 import { FlatList, ScrollView } from "react-native";
-import RenderImageItem from "./RenserImageItem";
+import RenderImageItem from "./RenderImageItem";
 import provinces from "../../../shared/provinces.json";
 import {
   Select,
@@ -44,10 +42,21 @@ import {
 } from "@/components/ui/select";
 import { ChevronDownIcon } from "@/components/ui/icon";
 import { Textarea, TextareaInput } from "@/components/ui/textarea";
+import { CreateOrEditRestaurantDto } from "../interfaces/create-or-edit-restaurant.interface";
+import moment from "moment";
+
+export interface CreateOrEditRestaurantFormProps {
+  onSubmit: (data: CreateOrEditRestaurantDto) => void;
+  isLoading: boolean;
+  mode?: "create" | "edit";
+  initialValues?: Partial<CreateOrEditRestaurantDto>;
+}
 
 const CreateOrEditRestaurantForm = ({
   onSubmit,
   isLoading,
+  mode,
+  initialValues,
 }: CreateOrEditRestaurantFormProps) => {
   const {
     control,
@@ -55,11 +64,30 @@ const CreateOrEditRestaurantForm = ({
     formState: { errors },
     setValue,
     watch,
+    reset,
   } = useForm<CreateOrEditRestaurantDto>({
     resolver: zodResolver(restaurantSchema),
+    defaultValues: {
+      ...initialValues,
+      images: initialValues?.images || [],
+    },
   });
 
+  useEffect(() => {
+    if (initialValues) {
+      reset(initialValues);
+    }
+  }, [initialValues, reset]);
+
   const images = watch("images") || [];
+
+  const [deletedExistingImages, setDeletedExistingImages] = useState<number[]>(
+    []
+  );
+
+  const removeExistingImage = (index: number) => {
+    setDeletedExistingImages([...deletedExistingImages, index]);
+  };
 
   const [selectedProvince, setSelectedProvince] = useState<Provinces | null>(
     null
@@ -81,11 +109,9 @@ const CreateOrEditRestaurantForm = ({
   };
 
   const formatTime = (date: Date | undefined) => {
-    if (!date) return "hh:mm AM/PM";
-    return date.toLocaleTimeString([], {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
+    if (!date) return "";
+    const formattedTime = moment(date).format("hh:mm A");
+    return formattedTime === "Invalid date" ? "" : formattedTime;
   };
 
   const pickImages = async () => {
@@ -102,16 +128,22 @@ const CreateOrEditRestaurantForm = ({
 
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 1,
       allowsMultipleSelection: true,
+      aspect: [4, 3],
+      quality: 0.8,
       selectionLimit: MAX_IMAGES - images.length,
     });
 
     if (!result.canceled && result.assets.length > 0) {
-      const newImages = [...images, ...result.assets.map((asset) => asset.uri)];
-      setValue("images", newImages.slice(0, MAX_IMAGES));
+      const newImages = result.assets.map((asset) => ({
+        uri: asset.uri,
+        fileName: asset.fileName ?? undefined,
+        fileSize: asset.fileSize,
+        type: asset.type,
+      }));
+      setValue("images", [...images, ...newImages], {
+        shouldValidate: true,
+      });
     }
   };
 
@@ -137,21 +169,32 @@ const CreateOrEditRestaurantForm = ({
               isRequired={true}
               isDisabled={isLoading}
             >
-              {images.length > 0 && (
+              {/* Kết hợp cả initial images và new images vào cùng một FlatList */}
+              {(mode === "edit" && (initialValues?.images?.length || 0) > 0) ||
+              images.length > 0 ? (
                 <FlatList
-                  data={images}
+                  data={
+                    mode === "edit"
+                      ? [...(initialValues?.images || []), ...images]
+                      : images
+                  }
                   renderItem={({ item, index }) => (
                     <RenderImageItem
                       item={item}
                       index={index}
-                      removeImage={removeImage}
+                      removeImage={
+                        index < (initialValues?.images?.length || 0) &&
+                        mode === "edit"
+                          ? removeExistingImage
+                          : removeImage
+                      }
                     />
                   )}
-                  keyExtractor={(item, index) => index.toString()}
+                  keyExtractor={(_, index) => index.toString()}
                   numColumns={3}
                   scrollEnabled={false}
                 />
-              )}
+              ) : null}
 
               <Button
                 onPress={pickImages}
@@ -200,7 +243,6 @@ const CreateOrEditRestaurantForm = ({
             <Input className="my-1">
               <InputField
                 type="text"
-                placeholder="Restaurant Name"
                 onChangeText={onChange}
                 onBlur={onBlur}
                 value={value}
@@ -406,7 +448,6 @@ const CreateOrEditRestaurantForm = ({
             <Input className="my-1">
               <InputField
                 type="text"
-                placeholder="Restaurant Address"
                 onChangeText={onChange}
                 onBlur={onBlur}
                 value={value}

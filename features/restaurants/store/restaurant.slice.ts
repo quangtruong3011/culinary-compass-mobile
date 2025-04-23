@@ -1,12 +1,11 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { RestaurantState } from "../interfaces/restaurant.interface";
 import { restaurantApi } from "../api/restaurant.api";
+import { RestaurantState } from "../interfaces/restaurant-state.interface";
+import { PAGE, PAGE_SIZE } from "@/constants/constants";
 
-const initialState: RestaurantState = {
-  restaurants: [],
-  currentRestaurant: {
-    id: null,
-  },
+const initialState: Readonly<RestaurantState> = {
+  restaurants: null,
+  currentRestaurant: null,
   is_loading: false,
   error: null,
 };
@@ -19,7 +18,7 @@ const restaurantSlice = createSlice({
       state.restaurants = action.payload;
     },
     setCurrentRestaurant: (state, { payload }) => {
-      state.currentRestaurant.id = payload;
+      state.currentRestaurant = payload;
     },
     setLoading: (state, action) => {
       state.is_loading = action.payload;
@@ -96,8 +95,41 @@ const restaurantSlice = createSlice({
       }
     );
     // Find one restaurant for admin
-    
-    
+    builder.addMatcher(
+      restaurantApi.endpoints.findOneRestaurantForAdmin.matchPending,
+      (state) => {
+        state.is_loading = true;
+        state.error = null;
+      }
+    );
+    builder.addMatcher(
+      restaurantApi.endpoints.findOneRestaurantForAdmin.matchFulfilled,
+      (state, { payload }) => {
+        state.is_loading = false;
+        state.currentRestaurant = payload.data;
+      }
+    );
+
+    // Delete restaurant
+    builder.addMatcher(
+      restaurantApi.endpoints.removeRestaurant.matchPending,
+      (state) => {
+        state.is_loading = true;
+        state.error = null;
+      }
+    );
+    builder.addMatcher(
+      restaurantApi.endpoints.removeRestaurant.matchFulfilled,
+      (state) => {
+        state.is_loading = false;
+
+        restaurantApi.endpoints.findAllRestaurantsForAdmin.initiate({
+          page: PAGE,
+          limit: PAGE_SIZE,
+          filterText: "",
+        });
+      }
+    );
   },
 });
 

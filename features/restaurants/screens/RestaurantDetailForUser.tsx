@@ -1,4 +1,4 @@
-import { useFindRestaurantForUserQuery } from "../api/restaurant.api";
+import { useFindOneRestaurantForUserQuery } from "../api/restaurant.api";
 import { Alert, ScrollView } from "react-native";
 import { Box } from "@/components/ui/box";
 import { HStack } from "@/components/ui/hstack";
@@ -8,16 +8,16 @@ import { Text } from "@/components/ui/text";
 import { VStack } from "@/components/ui/vstack";
 import { Ionicons } from "@expo/vector-icons";
 import { StyleSheet } from "react-native";
-import CreateBookingForm from "@/features/bookings/screens/CreateOrEditBookingForm";
 import { useCreateBookingMutation } from "@/features/bookings/api/booking.api";
 import { CreateOrEditBookingDto } from "@/features/bookings/interfaces/create-or-edit-booking.interface";
+import CreateOrEditBookingForm from "@/features/bookings/screens/CreateOrEditBookingForm";
 
 interface RestaurantDetailForUserProps {
   id: string;
 }
 
 const RestaurantDetailForUser = ({ id }: RestaurantDetailForUserProps) => {
-  const { data, isLoading, isError } = useFindRestaurantForUserQuery(id);
+  const { data, isLoading, isError } = useFindOneRestaurantForUserQuery(id);
   const [createBooking, { isLoading: isCreating }] = useCreateBookingMutation();
 
   const handleCreateBooking = async (formData: CreateOrEditBookingDto) => {
@@ -63,7 +63,7 @@ const RestaurantDetailForUser = ({ id }: RestaurantDetailForUserProps) => {
         >
           <Heading size="md">Booking</Heading>
         </HStack>
-        <CreateBookingForm
+        <CreateOrEditBookingForm
           onSubmit={handleCreateBooking}
           isLoading={isCreating}
         />

@@ -1,6 +1,5 @@
-
 interface SearchListRestaurantForAdminProps {
-    filterText: string;
+  filterText: string;
 }
 
 export default function SearchListRestaurantForAdmin() {}

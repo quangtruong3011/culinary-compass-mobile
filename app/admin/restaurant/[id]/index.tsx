@@ -1,23 +1,72 @@
+import { Button, ButtonIcon, ButtonText } from "@/components/ui/button";
 import { HStack } from "@/components/ui/hstack";
+import { TrashIcon } from "@/components/ui/icon";
 import { Text } from "@/components/ui/text";
 import { VStack } from "@/components/ui/vstack";
+import { useRemoveRestaurantMutation } from "@/features/restaurants/api/restaurant.api";
+import { RootState } from "@/store/store";
 import { Ionicons } from "@expo/vector-icons";
-import { Link, Stack, useLocalSearchParams } from "expo-router";
-import { TouchableOpacity } from "react-native";
+import { Link, Stack, useRouter } from "expo-router";
+import { Alert, ScrollView, TouchableOpacity } from "react-native";
+import { useSelector } from "react-redux";
 
 export default function RestaurantDetailForAdminScreen() {
-  const { id } = useLocalSearchParams();
+  const restaurant = useSelector(
+    (state: RootState) => state.restaurant?.currentRestaurant
+  );
+  const id = restaurant?.id;
+  const router = useRouter();
+
+  const [remove, { isLoading: isRemoving }] = useRemoveRestaurantMutation();
+
+  const handleDelete = async () => {
+    Alert.alert(
+      "Are you sure?",
+      `Are you sure you want to delete restaurant "${restaurant?.name}"?`,
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "OK",
+          onPress: async () => {
+            await remove(id as number).unwrap();
+            router.push({
+              pathname: "/admin/(tabs)/restaurant",
+            });
+            // router.replace({
+            //   pathname: "/admin/(tabs)/restaurant",
+            // });
+          },
+        },
+      ],
+      { cancelable: false }
+    );
+  };
 
   const options = [
+    {
+      id: "info",
+      label: "Infomation",
+      icon: "information-circle",
+      href: `/admin/restaurant/${id}/info` as const,
+    },
     {
       id: "tables",
       label: "Tables",
       icon: "table",
       href: `/admin/restaurant/${id}/table` as const,
     },
+    {
+      id: "booking",
+      label: "Booking",
+      icon: "calendar",
+      href: `/admin/restaurant/${id}/booking` as const,
+    },
   ];
   return (
-    <>
+    <ScrollView>
       <Stack.Screen
         options={{
           headerShown: true,
@@ -34,7 +83,6 @@ export default function RestaurantDetailForAdminScreen() {
               padding: 16,
               borderRadius: 8,
               backgroundColor: "#fff",
-              marginBottom: 8,
               shadowColor: "#000",
               shadowOffset: {
                 width: 0,
@@ -54,7 +102,11 @@ export default function RestaurantDetailForAdminScreen() {
             </TouchableOpacity>
           </Link>
         ))}
+        <Button size="lg" onPress={handleDelete} disabled={isRemoving}>
+          <ButtonIcon as={TrashIcon} />
+          <ButtonText>Delete</ButtonText>
+        </Button>
       </VStack>
-    </>
+    </ScrollView>
   );
 }

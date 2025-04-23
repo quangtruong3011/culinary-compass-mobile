@@ -1,9 +1,7 @@
+import { User } from "@/features/users/interfaces/user.interface";
+
 export interface AuthState {
-  user: null | {
-    id: number;
-    email: string;
-    roles: string[];
-  };
+  user: User | null;
   access_token: string | null;
   refresh_token: string | null;
   is_authenticated: boolean;

@@ -1,6 +1,5 @@
 import { FlatList } from "react-native";
 import RestaurantCardForUser from "./RestaurantCardForUser";
-import { GetAllRestaurantsForUser } from "../interfaces/get-all-restaurant-for-user.interface";
 import moment from "moment";
 
 interface RestaurantListForUserProps {

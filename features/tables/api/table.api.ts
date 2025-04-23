@@ -1,9 +1,9 @@
 import baseQueryWithReauth from "@/shared/base.api";
-import { PaginationOptions } from "@/shared/pagination.interface";
 import { createApi } from "@reduxjs/toolkit/query/react";
 import { CreateOrEditTableDto } from "../interfaces/create-or-edit-table.interface";
 import { GetAllTableResponse } from "../interfaces/get-all-table.interface";
 import { GetTableResponse } from "../interfaces/get-table.interface";
+import { TablePaginationParams } from "../interfaces/table-pagination-params";
 
 export const tableApi = createApi({
   reducerPath: "tableApi",
@@ -12,7 +12,7 @@ export const tableApi = createApi({
   endpoints: (builder) => ({
     findAllTablesForAdmin: builder.query<
       GetAllTableResponse,
-      PaginationOptions
+      TablePaginationParams
     >({
       query: (options) => ({
         url: "/tables",
@@ -20,7 +20,8 @@ export const tableApi = createApi({
         params: {
           page: options.page,
           limit: options.limit,
-          filterText: options.filterText,
+          filter: options.filterText,
+          restaurantId: options.restaurantId,
         },
       }),
       transformResponse: (response: GetAllTableResponse) => {
@@ -35,6 +36,7 @@ export const tableApi = createApi({
         };
       },
     }),
+
     createTable: builder.mutation<any, CreateOrEditTableDto>({
       query: (body) => ({
         url: "/tables",
@@ -42,6 +44,7 @@ export const tableApi = createApi({
         body,
       }),
     }),
+
     findOneTable: builder.query<GetTableResponse, number>({
       query: (id) => ({
         url: `/tables/${id}`,
@@ -57,6 +60,7 @@ export const tableApi = createApi({
         },
       }),
     }),
+
     updateTable: builder.mutation<
       any,
       { id: number; body: CreateOrEditTableDto }
@@ -67,6 +71,7 @@ export const tableApi = createApi({
         body,
       }),
     }),
+
     deleteTable: builder.mutation<any, number>({
       query: (id) => ({
         url: `/tables/${id}`,

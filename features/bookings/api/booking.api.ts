@@ -21,19 +21,19 @@ export const bookingApi = createApi({
       }),
     }),
 
-      getAllBookings: builder.query<GetAllBooking, void>({
-        query: () => ({
-          url: "/bookings",
-          method: "GET",
-          params: {
-            page: 1,
-            limit: 10,
-          },
-        }),
-        transformResponse: (response: any) => {
-          return response;
+    getAllBookings: builder.query<GetAllBooking, void>({
+      query: () => ({
+        url: "/bookings",
+        method: "GET",
+        params: {
+          page: 1,
+          limit: 10,
         },
       }),
+      transformResponse: (response: any) => {
+        return response;
+      },
+    }),
 
     getBookingsByUser: builder.query<GetAllBookingForUser, BookingParam>({
       query: (options: BookingParam) => ({
@@ -65,7 +65,7 @@ export const bookingApi = createApi({
     updateBooking: builder.mutation<
       any,
       { id: number; data: CreateOrEditBookingDto }
-      >({
+    >({
       query: ({ id, data }) => ({
         url: `/bookings/${id}`,
         method: "PATCH",

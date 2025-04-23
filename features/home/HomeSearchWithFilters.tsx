@@ -1,4 +1,4 @@
-import { Icon, SearchIcon } from "@/components/ui/icon";
+import { SearchIcon } from "@/components/ui/icon";
 import { Input, InputField, InputIcon, InputSlot } from "@/components/ui/input";
 import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
@@ -8,7 +8,10 @@ interface SearchProps {
   onFilterTextChange: (text: string) => void;
 }
 
-const Search = ({ filterText, onFilterTextChange }: SearchProps) => {
+const HomeSearchWithFilters = ({
+  filterText,
+  onFilterTextChange,
+}: SearchProps) => {
   const { control } = useForm({
     defaultValues: {
       filterText: filterText,
@@ -90,10 +93,8 @@ const Search = ({ filterText, onFilterTextChange }: SearchProps) => {
               onFilterTextChange(text);
             }}
           />
-          <InputSlot className="pr-3">
-            <InputIcon>
-              <Icon as={SearchIcon} size="sm" />
-            </InputIcon>
+          <InputSlot style={{ paddingRight: 16 }}>
+            <InputIcon as={SearchIcon}></InputIcon>
           </InputSlot>
         </Input>
       )}
@@ -101,4 +102,4 @@ const Search = ({ filterText, onFilterTextChange }: SearchProps) => {
   );
 };
 
-export default Search;
+export default HomeSearchWithFilters;

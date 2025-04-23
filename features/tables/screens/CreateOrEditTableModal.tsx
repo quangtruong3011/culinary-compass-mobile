@@ -38,9 +38,8 @@ const CreateOrEditTableModal = ({
 }) => {
   const dispatch = useDispatch();
   const restaurantId = useSelector(
-    (state: RootState) => state.restaurant.currentRestaurant.id
+    (state: RootState) => state?.restaurant?.currentRestaurant?.id
   );
-  
   const {
     control,
     reset,
@@ -110,14 +109,6 @@ const CreateOrEditTableModal = ({
           </ModalCloseButton>
         </ModalHeader>
         <ModalBody>
-          {errors && (
-            <Text className="text-red-500 text-sm mb-2" size="sm">
-              {errors.id?.message ||
-                errors.name?.message ||
-                errors.numberOfSeats?.message ||
-                errors.restaurantId?.message}
-            </Text>
-          )}
           <CreateOrEditTableForm control={control} errors={errors} />
         </ModalBody>
         <ModalFooter>

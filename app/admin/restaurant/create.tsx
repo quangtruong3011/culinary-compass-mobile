@@ -1,20 +1,26 @@
-import { Box } from "@/components/ui/box";
 import { useCreateRestaurantMutation } from "@/features/restaurants/api/restaurant.api";
-import { CreateOrEditRestaurantDto } from "@/features/restaurants/interfaces/restaurant.interface";
 import CreateOrEditRestaurantForm from "@/features/restaurants/screens/CreateOrEditRestaurantForm";
-import { KeyboardAvoidingView, Platform, ScrollView } from "react-native";
+import { ScrollView } from "react-native";
 import * as FileSystem from "expo-file-system";
+import { CreateOrEditRestaurantDto } from "@/features/restaurants/interfaces/create-or-edit-restaurant.interface";
+import { Stack } from "expo-router";
+import { LocalImage } from "@/features/restaurants/interfaces/restaurant-image.interface";
 
 export default function CreateRestauranScreen() {
   const [create, { isLoading, error }] = useCreateRestaurantMutation();
 
   const handleSubmit = async (data: CreateOrEditRestaurantDto) => {
     const imageUris = await Promise.all(
-      data.images.map(async (uri) => {
-        const base64 = await FileSystem.readAsStringAsync(uri, {
-          encoding: FileSystem.EncodingType.Base64,
-        });
-        return `data:image/jpeg;base64,${base64}`;
+      data.images.map(async (image) => {
+        const base64 = await FileSystem.readAsStringAsync(
+          (image as LocalImage).uri,
+          {
+            encoding: FileSystem.EncodingType.Base64,
+          }
+        );
+        return {
+          uri: `data:image/jpeg;base64,${base64}`,
+        };
       })
     );
     const payload = {
@@ -32,25 +38,19 @@ export default function CreateRestauranScreen() {
   };
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
-      keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 0}
-      style={{ flex: 1 }}
-    >
-      <ScrollView
-        contentContainerStyle={{ flexGrow: 1 }}
-        keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={false}
-      >
-        <Box className="justify-center items-center p-4">
-          <Box className="w-full max-w-md">
-            <CreateOrEditRestaurantForm
-              onSubmit={handleSubmit}
-              isLoading={isLoading}
-            />
-          </Box>
-        </Box>
-      </ScrollView>
-    </KeyboardAvoidingView>
+    <ScrollView>
+      <Stack.Screen
+        options={{
+          headerShown: true,
+          headerTitle: "Create Restaurant",
+        }}
+      />
+
+      <CreateOrEditRestaurantForm
+        onSubmit={handleSubmit}
+        isLoading={isLoading}
+        mode="create"
+      />
+    </ScrollView>
   );
 }

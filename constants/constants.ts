@@ -6,3 +6,5 @@ export const USER_ROLES = {
 } as const;
 
 export const MAX_IMAGES = 6;
+export const PAGE = 1;
+export const PAGE_SIZE = 10;

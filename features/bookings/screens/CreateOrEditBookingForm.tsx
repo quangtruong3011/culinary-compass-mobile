@@ -32,7 +32,7 @@ const CreateOrEditBookingForm = ({
   onSubmit,
 }: CreateOrEditBookingProps) => {
   const restaurantId = useSelector(
-    (state: RootState) => state.restaurant.currentRestaurant.id
+    (state: RootState) => state?.restaurant?.currentRestaurant?.id
   );
   const { is_authenticated, user } = useAuth();
   const userId = user?.id;

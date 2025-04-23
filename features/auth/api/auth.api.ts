@@ -12,6 +12,7 @@ import baseQueryWithReauth from "@/shared/base.api";
 export const authApi = createApi({
   reducerPath: "authApi",
   baseQuery: baseQueryWithReauth,
+  tagTypes: ["Auth"],
   endpoints: (builder) => ({
     login: builder.mutation<LoginResponse, LoginFormData>({
       query: (body) => ({

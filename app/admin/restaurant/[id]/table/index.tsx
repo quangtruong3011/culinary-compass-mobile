@@ -10,20 +10,25 @@ import TableListHeader from "@/features/tables/screens/TableListHeader";
 import TableCard from "@/features/tables/screens/TableCard";
 import CreateOrEditTableModal from "@/features/tables/screens/CreateOrEditTableModal";
 import { Box } from "@/components/ui/box";
-
-const PASE_SIZE = 10;
+import { useSelector } from "react-redux";
+import { RootState } from "@/store/store";
+import { PAGE_SIZE } from "@/constants/constants";
 
 export default function RestaurantTableScreen() {
   const [page, setPage] = useState(1);
   const [isManualRefreshing, setIsManualRefreshing] = useState(false);
   const [isOpenModal, setIsOpenModal] = useState(false);
   const [tableId, setTableId] = useState<number | null>(null);
+  const restaurantId = useSelector(
+    (state: RootState) => state.restaurant?.currentRestaurant?.id ?? null
+  );
 
   const { data, isLoading, isError, refetch, isFetching } =
     useFindAllTablesForAdminQuery({
       page: page,
-      limit: PASE_SIZE,
+      limit: PAGE_SIZE,
       filterText: "",
+      restaurantId: restaurantId as number,
     });
 
   const [remove, { isLoading: isRemoving }] = useDeleteTableMutation();

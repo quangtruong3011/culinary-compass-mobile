@@ -29,9 +29,19 @@ const RestaurantCardForAdmin = ({
   closingTime,
 }: RestaurantCardForAdminProps) => {
   const dispatch = useDispatch();
+
   const handlePress = () => {
-    dispatch(setCurrentRestaurant(id));
+    dispatch(
+      setCurrentRestaurant({
+        id: id,
+        name: name,
+        address: address,
+        openingTime: openingTime,
+        closingTime: closingTime,
+      })
+    );
   };
+
   return (
     <Link href={`/admin/restaurant/${id}`} asChild>
       <TouchableOpacity onPress={handlePress}>

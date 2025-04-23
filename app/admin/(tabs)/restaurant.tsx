@@ -1,18 +1,18 @@
 import { useFindAllRestaurantsForAdminQuery } from "@/features/restaurants/api/restaurant.api";
 import RestaurantCardForAdmin from "@/features/restaurants/screens/RestaurantCardForAdmin";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { ActivityIndicator, FlatList, RefreshControl } from "react-native";
 import moment from "moment";
 import { Text } from "@/components/ui/text";
 import { Link } from "expo-router";
+import { PAGE_SIZE } from "@/constants/constants";
 
 export default function RestaurantAdminScreen() {
   const [page, setPage] = useState(1);
-  const limit = 10;
   const { data, isLoading, isError, refetch, isFetching } =
     useFindAllRestaurantsForAdminQuery({
       page: page,
-      limit: limit,
+      limit: PAGE_SIZE,
       filterText: "",
     });
 
@@ -43,7 +43,7 @@ export default function RestaurantAdminScreen() {
 
   return (
     <FlatList
-      data={data?.data.results}
+      data={data?.data?.results}
       renderItem={({ item }) => (
         <RestaurantCardForAdmin
           id={item.id}
@@ -54,9 +54,11 @@ export default function RestaurantAdminScreen() {
           closingTime={moment(item.closingTime).format("HH:mm")}
         />
       )}
-      ListHeaderComponent={() => <Link href={`/admin/restaurant/create`}>Restaurants</Link>}
+      ListHeaderComponent={() => (
+        <Link href={`/admin/restaurant/create`}>Restaurants</Link>
+      )}
       ListEmptyComponent={!isLoading ? <Text>No restaurants found</Text> : null}
-      keyExtractor={(item) => item.id.toString()}
+      keyExtractor={(item) => (item.id ?? "").toString()}
       showsVerticalScrollIndicator={false}
       refreshControl={
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
