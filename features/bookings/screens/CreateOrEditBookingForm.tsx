@@ -19,6 +19,7 @@ import { useAuth } from "@/features/auth/hooks/useAuth";
 import { Text } from "@/components/ui/text";
 import { CreateOrEditBookingDto } from "../interfaces/create-or-edit-booking.interface";
 import moment from "moment";
+import { router } from "expo-router";
 
 interface CreateOrEditBookingProps {
   isLoading: boolean;
@@ -91,6 +92,10 @@ const CreateOrEditBookingForm = ({
 
   const formatTime = (date: Date | undefined) => {
     return date ? moment(date).format("hh:mm A") : "";
+  };
+
+  const handleCancel = () => {
+    router.back();
   };
 
   return (
@@ -369,6 +374,15 @@ const CreateOrEditBookingForm = ({
         <ButtonText>Submit</ButtonText>
         {isLoading && <ButtonSpinner animating={isLoading} />}
       </Button>
+      <Button
+        
+          variant="outline"
+          isDisabled={isLoading}
+          onPress={handleCancel}
+        style={{ marginTop: 10 }}
+          >
+        <ButtonText>Cancel</ButtonText>
+          </Button>
 
       {errors.restaurantId && <Text>{errors.restaurantId.message}</Text>}
     </VStack>

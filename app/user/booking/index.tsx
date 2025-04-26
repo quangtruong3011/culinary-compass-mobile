@@ -24,7 +24,9 @@ export default function BookingScreen() {
       userId: user?.id as number,
     });
 
-  const bookings = data?.data.results || [];
+  const bookings = [...(data?.data.results || [])].sort(
+    (a, b) => new Date(b.createAt).getTime() - new Date(a.createAt).getTime()
+  );
 
   return (
     <>
@@ -40,6 +42,8 @@ export default function BookingScreen() {
             endTime={item.endTime}
             numberOfSeats={item.guests}
             isConfirmed={item.isConfirmed}
+            isDeleted={item.isDeleted}
+            onActionComplete={refetch}
           />
         )}
         ListHeaderComponent={BookingListHeader}

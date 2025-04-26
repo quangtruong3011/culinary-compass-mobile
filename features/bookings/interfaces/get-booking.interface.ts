@@ -10,5 +10,6 @@ export interface GetBooking {
     endTime: Date;
     guests: number;
     isConfirmed: boolean;
+    isDeleted: boolean;
   };
 }

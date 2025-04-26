@@ -3,7 +3,7 @@ import { Button, ButtonIcon, ButtonText } from "@/components/ui/button";
 import { HStack } from "@/components/ui/hstack";
 import { VStack } from "@/components/ui/vstack";
 import React from "react";
-import { Pressable, StyleSheet } from "react-native";
+import { Alert, Pressable, StyleSheet } from "react-native";
 import { Text } from "@/components/ui/text";
 import { useRouter } from "expo-router";
 import { EditIcon, TrashIcon } from "@/components/ui/icon";
@@ -11,7 +11,8 @@ import moment from "moment";
 import { useDispatch, useSelector } from "react-redux";
 import { setCurrentBooking } from "../store/booking.slice";
 import { RootState } from "@/store/store";
-import { useFindBookingForUserQuery } from "../api/booking.api";
+import { useDeleteBookingMutation, useFindBookingForUserQuery, useGetBookingsByUserQuery } from "../api/booking.api";
+import { useFindAllRestaurantsForUserQuery, useFindRestaurantForUserQuery } from "@/features/restaurants/api/restaurant.api";
 
 interface BookingListForUserProps {
   id: number;
@@ -21,6 +22,7 @@ interface BookingListForUserProps {
   endTime: Date;
   numberOfSeats: number;
   isConfirmed: boolean;
+  isDeleted: boolean;
 }
 const BookingCardForUser = ({
   id,
@@ -30,27 +32,57 @@ const BookingCardForUser = ({
   endTime,
   numberOfSeats,
   isConfirmed,
-}: BookingListForUserProps) => {
+  isDeleted,
+  onActionComplete,
+}: BookingListForUserProps & {onActionComplete: () => void}) => {
   const router = useRouter();
   const dispatch = useDispatch();
 
-  const restaurant = useSelector(
-    (state: any) => state.restaurant.restaurants.find((r: any) => r.id === restaurantId));
+  const { data: restaurant } = useFindRestaurantForUserQuery(restaurantId.toString());
 
-  const { data } = useFindBookingForUserQuery(id as number);
+  const { data, isLoading, } = useFindBookingForUserQuery(id as number);
+
+  const [deleteBooking] = useDeleteBookingMutation();
 
   const handleEditPress = () => {
     dispatch(setCurrentBooking(data?.data));
     router.push(`../user/booking/${id}`);
+    console.log("isDeleted", isDeleted);
+    onActionComplete();
+  };
+
+  const handleCancelPress = async () => {
+    Alert.alert(
+      "Confirm Booking",
+      "Are you sure you want to cancel this booking?",
+      [
+        {
+          text: "No",
+          style: "cancel",
+        },
+        {
+          text: "Yes",
+          onPress: async () => {
+            try {
+              await deleteBooking(id as number).unwrap();
+              console.log("Booking cancelled successfully");
+              onActionComplete();
+            } catch (error) {
+              console.error("Failed to cancel booking:", error);
+            }
+          },
+        },
+      ]
+    );
   };
 
   return (
     <Box style={styles.box}>
       <HStack className="justify-between items-center">
         <VStack space="xs">
-          {/* <Text size="lg" className="font-semibold">
-            Retaurant: {restaurant?.name}
-          </Text> */}
+          <Text size="lg" className="font-semibold">
+            Retaurant: {restaurant?.data.name || "Unknown"}
+          </Text>
           <Text size="lg" className="font-semibold">
             {moment(date).format("MMMM Do YYYY")}
           </Text>
@@ -66,18 +98,27 @@ const BookingCardForUser = ({
           </Text>
         </VStack>
         <HStack space="xs">
-          <Button variant="outline" onPress={handleEditPress}>
-            <ButtonIcon as={EditIcon} size="sm" />
-            <ButtonText>Edit</ButtonText>
-          </Button>
-          <Button
-            variant="solid"
-            style={{ backgroundColor: "red" }}
-            onPress={() => console.log("Cancel booking")}
-          >
-            <ButtonIcon as={TrashIcon} size="sm" />
-            <ButtonText>Cancel</ButtonText>
-          </Button>
+          {isDeleted ? (
+            <Text size="sm" className="text-red-500 font-semibold">
+              Booking Cancelled
+            </Text>
+          ) : (
+            <>
+              <Button variant="outline" onPress={handleEditPress}>
+                <ButtonIcon as={EditIcon} size="sm" />
+                <ButtonText>Edit</ButtonText>
+              </Button>
+              <Button
+                variant="solid"
+                style={{ backgroundColor: "red" }}
+                onPress={handleCancelPress}
+                isDisabled={isLoading}
+              >
+                <ButtonIcon as={TrashIcon} size="sm" />
+                <ButtonText>Cancel</ButtonText>
+              </Button>
+          </>
+          )}
         </HStack>
       </HStack>
     </Box>
