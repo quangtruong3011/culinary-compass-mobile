@@ -49,6 +49,8 @@ export default function BookingScreen() {
             endTime={item.endTime}
             numberOfSeats={item.guests}
             isConfirmed={item.isConfirmed}
+            isDeleted={item.isDeleted}
+            onActionComplete={refetch}
           />
         )}
         ListHeaderComponent={BookingListHeader}

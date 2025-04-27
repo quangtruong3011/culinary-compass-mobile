@@ -86,13 +86,12 @@ export const bookingApi = createApi({
       },
     }),
 
-    //   deleteBooking: builder.mutation<void, number>({
-    //     query: (id) => ({
-    //       url: `/bookings/${id}`,
-    //       method: "DELETE",
-    //     }),
-    //     invalidatesTags: ["Booking"],
-    //   }),
+      deleteBooking: builder.mutation<any, number>({
+        query: (id) => ({
+          url: `/bookings/${id}`,
+          method: "DELETE",
+        }),
+      }),
   }),
 });
 
@@ -103,5 +102,5 @@ export const {
   useFindOneBookingForUserQuery,
   useUpdateBookingMutation,
   useConfirmBookingMutation,
-  // useDeleteBookingMutation,
+  useDeleteBookingMutation,
 } = bookingApi;

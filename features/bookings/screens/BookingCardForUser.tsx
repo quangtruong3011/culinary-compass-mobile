@@ -21,6 +21,7 @@ interface BookingListForUserProps {
   endTime: Date;
   numberOfSeats: number;
   isConfirmed: boolean;
+  isDeleted: boolean;
 }
 
 type BookingStatus = "pending" | "confirmed" | "cancelled";
