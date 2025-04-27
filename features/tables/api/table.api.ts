@@ -24,17 +24,6 @@ export const tableApi = createApi({
           restaurantId: options.restaurantId,
         },
       }),
-      transformResponse: (response: GetAllTableResponse) => {
-        return {
-          data: {
-            results: response.data.results,
-            total: response.data.total,
-            page: response.data.page,
-            limit: response.data.limit,
-            totalPages: response.data.totalPages,
-          },
-        };
-      },
     }),
 
     createTable: builder.mutation<any, CreateOrEditTableDto>({
@@ -49,15 +38,6 @@ export const tableApi = createApi({
       query: (id) => ({
         url: `/tables/${id}`,
         method: "GET",
-      }),
-      transformResponse: (response: GetTableResponse) => ({
-        data: {
-          id: response.data.id,
-          name: response.data.name,
-          restaurantId: response.data.restaurantId,
-          numberOfSeats: response.data.numberOfSeats,
-          isAvailable: response.data.isAvailable,
-        },
       }),
     }),
 

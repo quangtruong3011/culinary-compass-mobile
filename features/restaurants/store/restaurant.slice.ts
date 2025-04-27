@@ -20,6 +20,9 @@ const restaurantSlice = createSlice({
     setCurrentRestaurant: (state, { payload }) => {
       state.currentRestaurant = payload;
     },
+    clearCurrentRestaurant: (state) => {
+      state.currentRestaurant = null;
+    },
     setLoading: (state, action) => {
       state.is_loading = action.payload;
     },
@@ -28,6 +31,7 @@ const restaurantSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
+    // Create restaurant
     builder.addMatcher(
       restaurantApi.endpoints.createRestaurant.matchPending,
       (state) => {
@@ -50,6 +54,7 @@ const restaurantSlice = createSlice({
           error.message || "An error occurred while creating the restaurant.";
       }
     );
+    // Find all restaurants for admin
     builder.addMatcher(
       restaurantApi.endpoints.findAllRestaurantsForAdmin.matchPending,
       (state) => {
@@ -72,6 +77,7 @@ const restaurantSlice = createSlice({
           error.message || "An error occurred while fetching restaurants.";
       }
     );
+    // Find all restaurants for user
     builder.addMatcher(
       restaurantApi.endpoints.findAllRestaurantsForUser.matchPending,
       (state) => {
@@ -109,7 +115,36 @@ const restaurantSlice = createSlice({
         state.currentRestaurant = payload.data;
       }
     );
-
+    //Update restaurant
+    builder.addMatcher(
+      restaurantApi.endpoints.updateRestaurant.matchPending,
+      (state) => {
+        state.is_loading = true;
+        state.error = null;
+      }
+    );
+    builder.addMatcher(
+      restaurantApi.endpoints.updateRestaurant.matchFulfilled,
+      (state, { payload }) => {
+        state.is_loading = false;
+        state.currentRestaurant = payload.data;
+      }
+    );
+    //Find one restaurant for user
+    builder.addMatcher(
+      restaurantApi.endpoints.findOneRestaurantForUser.matchPending,
+      (state) => {
+        state.is_loading = true;
+        state.error = null;
+      }
+    );
+    builder.addMatcher(
+      restaurantApi.endpoints.findOneRestaurantForUser.matchFulfilled,
+      (state, { payload }) => {
+        state.is_loading = false;
+        state.currentRestaurant = payload.data;
+      }
+    );
     // Delete restaurant
     builder.addMatcher(
       restaurantApi.endpoints.removeRestaurant.matchPending,
@@ -133,6 +168,11 @@ const restaurantSlice = createSlice({
   },
 });
 
-export const { setRestaurants, setCurrentRestaurant, setLoading, setError } =
-  restaurantSlice.actions;
+export const {
+  setRestaurants,
+  setCurrentRestaurant,
+  clearCurrentRestaurant,
+  setLoading,
+  setError,
+} = restaurantSlice.actions;
 export const restaurantReducer = restaurantSlice.reducer;

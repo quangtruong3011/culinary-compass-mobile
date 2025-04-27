@@ -1,4 +1,5 @@
 import { User } from "@/features/users/interfaces/user.interface";
+import { SingleResponse } from "@/shared/api-response";
 
 export interface AuthState {
   user: User | null;
@@ -17,26 +18,6 @@ export interface LoginResponse {
 }
 
 export interface RegisterResponse {
-  data: {
-    user: {
-      id: number;
-      email: string;
-      roles: string[];
-    };
-    access_token: string;
-    refresh_token: string;
-  };
-}
-
-export interface GetMeResponse {
-  data: {
-    id: number;
-    email: string;
-    roles: string[];
-  };
-}
-
-export interface RefreshTokenResponse {
   data: {
     user: {
       id: number;

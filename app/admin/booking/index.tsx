@@ -1,21 +1,21 @@
+import { PAGE, PAGE_SIZE } from "@/constants/constants";
 import { useAuth } from "@/features/auth/hooks/useAuth";
-import {
-  useGetAllBookingsQuery,
-  useGetBookingsByUserQuery,
-} from "@/features/bookings/api/booking.api";
+import { useFindAllBookingForAdminQuery } from "@/features/bookings/api/booking.api";
 import BookingCardForAdmin from "@/features/bookings/screens/BookingCardForAdmin";
 import BookingCardForUser from "@/features/bookings/screens/BookingCardForUser";
 import BookingListHeader from "@/features/bookings/screens/BookingListHeader";
 import { useState } from "react";
 import { FlatList, Text } from "react-native";
 
-const PASE_SIZE = 10;
-
 export default function Booking() {
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useState(PAGE);
 
   const { data, isLoading, isError, refetch, isFetching } =
-    useGetAllBookingsQuery();
+    useFindAllBookingForAdminQuery({
+      page: PAGE,
+      limit: PAGE_SIZE,
+      filterText: "",
+    });
 
   const bookings = data?.data.results || [];
 

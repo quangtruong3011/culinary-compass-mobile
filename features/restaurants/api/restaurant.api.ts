@@ -1,14 +1,14 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
-import {} from "../interfaces/restaurant.interface";
 import { PaginationOptions } from "@/shared/pagination.interface";
 import baseQueryWithReauth from "@/shared/base.api";
 import { CreateOrEditRestaurantDto } from "../interfaces/create-or-edit-restaurant.interface";
 import { GetAllRestaurants } from "../interfaces/get-all-restaurant.interface";
-import { GetRestaurant } from "../interfaces/get-restaurant.interface";
+import { GetRestaurantDto } from "../interfaces/get-restaurant.interface";
 
 export const restaurantApi = createApi({
   reducerPath: "restaurantApi",
   baseQuery: baseQueryWithReauth,
+  tagTypes: ["Restaurant"],
   endpoints: (builder) => ({
     createRestaurant: builder.mutation<any, CreateOrEditRestaurantDto>({
       query: (body) => ({
@@ -16,6 +16,7 @@ export const restaurantApi = createApi({
         method: "POST",
         body,
       }),
+      invalidatesTags: ["Restaurant"],
     }),
 
     findAllRestaurantsForAdmin: builder.query<
@@ -31,9 +32,10 @@ export const restaurantApi = createApi({
           filterText: options.filterText,
         },
       }),
+      providesTags: ["Restaurant"],
     }),
 
-    findOneRestaurantForAdmin: builder.query<GetRestaurant, number>({
+    findOneRestaurantForAdmin: builder.query<GetRestaurantDto, number>({
       query: (id) => ({
         url: `/restaurants/${id}`,
         method: "GET",
@@ -41,7 +43,7 @@ export const restaurantApi = createApi({
     }),
 
     updateRestaurant: builder.mutation<
-      any,
+      GetRestaurantDto,
       {
         id: number;
         body: CreateOrEditRestaurantDto;
@@ -49,9 +51,13 @@ export const restaurantApi = createApi({
     >({
       query: ({ id, body }) => ({
         url: `/restaurants/${id}`,
-        method: "PUT",
+        method: "PATCH",
         body,
       }),
+      invalidatesTags: (result, error, { id }) => [
+        "Restaurant",
+        { type: "Restaurant", id },
+      ],
     }),
 
     removeRestaurant: builder.mutation<any, number>({
@@ -59,6 +65,7 @@ export const restaurantApi = createApi({
         url: `/restaurants/${id}`,
         method: "DELETE",
       }),
+      invalidatesTags: ["Restaurant"],
     }),
 
     findAllRestaurantsForUser: builder.query<
@@ -76,7 +83,7 @@ export const restaurantApi = createApi({
       }),
     }),
 
-    findOneRestaurantForUser: builder.query<GetRestaurant, string>({
+    findOneRestaurantForUser: builder.query<GetRestaurantDto, number>({
       query: (id) => ({
         url: `/restaurants/find-one-for-user/${id}`,
         method: "GET",

@@ -2,6 +2,7 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { authApi } from "../api/auth.api";
 import { AuthState } from "../interfaces/auth.interface";
 import { removeAuthTokens, saveAuthTokens } from "../utils/auth.storage";
+import { userApi } from "@/features/users/api/user.api";
 
 const initialState: AuthState = {
   user: null,
@@ -89,6 +90,7 @@ const authSlice = createSlice({
         state.error = (payload as any)?.data?.message || "Failed to fetch user";
       }
     );
+    // Refresh Token
     builder.addMatcher(authApi.endpoints.refreshToken.matchPending, (state) => {
       state.is_loading = true;
       state.error = null;
@@ -159,6 +161,18 @@ const authSlice = createSlice({
       (state, { payload }) => {
         state.is_loading = false;
         // state.error = payload.error;
+      }
+    );
+    // Update Profile
+    builder.addMatcher(userApi.endpoints.updateUser.matchPending, (state) => {
+      state.is_loading = true;
+      state.error = null;
+    });
+    builder.addMatcher(
+      userApi.endpoints.updateUser.matchFulfilled,
+      (state, { payload }) => {
+        state.is_loading = false;
+        state.user = payload.data;
       }
     );
   },

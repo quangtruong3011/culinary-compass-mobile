@@ -15,28 +15,31 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import { Button, ButtonSpinner, ButtonText } from "@/components/ui/button";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
-import { useAuth } from "@/features/auth/hooks/useAuth";
-import { Text } from "@/components/ui/text";
 import { CreateOrEditBookingDto } from "../interfaces/create-or-edit-booking.interface";
 import moment from "moment";
-import { router } from "expo-router";
+import {
+  useCreateBookingMutation,
+  useUpdateBookingMutation,
+} from "../api/booking.api";
+import {
+  Toast,
+  ToastDescription,
+  ToastTitle,
+  useToast,
+} from "@/components/ui/toast";
+import { useRouter } from "expo-router";
+import { Text } from "@/components/ui/text";
 
-interface CreateOrEditBookingProps {
-  isLoading: boolean;
-  initialValues?: Partial<CreateOrEditBookingDto>;
-  onSubmit: (data: CreateOrEditBookingDto) => void;
-}
-
-const CreateOrEditBookingForm = ({
-  isLoading,
-  initialValues,
-  onSubmit,
-}: CreateOrEditBookingProps) => {
+const CreateOrEditBooking = () => {
+  const toast = useToast();
+  const router = useRouter();
+  const { is_authenticated } = useSelector((state: RootState) => state?.auth);
   const restaurantId = useSelector(
     (state: RootState) => state?.restaurant?.currentRestaurant?.id
   );
-  const { is_authenticated, user } = useAuth();
-  const userId = user?.id;
+  const booking = useSelector(
+    (state: RootState) => state?.booking?.currentBooking
+  );
 
   const {
     control,
@@ -48,24 +51,24 @@ const CreateOrEditBookingForm = ({
     resolver: zodResolver(bookingSchema),
   });
 
+  const [create, { isLoading: isCreating }] = useCreateBookingMutation();
+  const [update, { isLoading: isUpdating }] = useUpdateBookingMutation();
+  const isLoading = isCreating || isUpdating;
+
   useEffect(() => {
-    if (initialValues) {
+    if (booking) {
       reset({
-        ...initialValues,
-        userId: Number(userId),
-        restaurantId: Number(restaurantId),
-        date: initialValues.date ? new Date(initialValues.date) : new Date(),
-        startTime: initialValues.startTime
-          ? new Date(initialValues.startTime)
-          : new Date(),
-        endTime: initialValues.endTime
-          ? new Date(initialValues.endTime)
-          : new Date(),
-        guests: Number(initialValues.guests),
+        restaurantId: Number(booking.restaurantId),
+        name: booking.name,
+        phone: booking.phone,
+        email: booking.email,
+        date: new Date(booking.date),
+        startTime: new Date(booking.startTime),
+        endTime: new Date(booking.endTime),
+        guests: Number(booking.guests),
       });
     } else {
       reset({
-        userId: Number(userId),
         restaurantId: Number(restaurantId),
         name: "",
         phone: "",
@@ -76,7 +79,7 @@ const CreateOrEditBookingForm = ({
         guests: 0,
       });
     }
-  }, [initialValues, reset]);
+  }, [booking, reset]);
 
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
@@ -94,8 +97,46 @@ const CreateOrEditBookingForm = ({
     return date ? moment(date).format("hh:mm A") : "";
   };
 
-  const handleCancel = () => {
-    router.back();
+  const onSubmit = async (data: CreateOrEditBookingDto) => {
+    try {
+      if (booking) {
+        await update({
+          id: booking.id,
+          body: data,
+        }).unwrap();
+        toast.show({
+          placement: "top right",
+          duration: 3000,
+          render: ({ id }) => (
+            <Toast nativeID={`toast-${id}`} action="success" variant="outline">
+              <VStack space="xs">
+                <ToastTitle>Updated successfully</ToastTitle>
+                <ToastDescription>
+                  Booking information has been updated
+                </ToastDescription>
+              </VStack>
+            </Toast>
+          ),
+        });
+      } else {
+        await create(data).unwrap();
+        toast.show({
+          placement: "top right",
+          duration: 3000,
+          render: ({ id }) => (
+            <Toast nativeID={`toast-${id}`} action="success" variant="outline">
+              <VStack space="xs">
+                <ToastTitle>Created successfully</ToastTitle>
+                <ToastDescription>
+                  Booking information has been saved
+                </ToastDescription>
+              </VStack>
+            </Toast>
+          ),
+        });
+        reset();
+      }
+    } catch (error) {}
   };
 
   return (
@@ -115,7 +156,6 @@ const CreateOrEditBookingForm = ({
             <Input className="my-1">
               <InputField
                 type="text"
-                placeholder="Customer Name"
                 onChangeText={onChange}
                 onBlur={onBlur}
                 value={value}
@@ -147,8 +187,7 @@ const CreateOrEditBookingForm = ({
             <Input className="my-1">
               <InputField
                 type="text"
-                placeholder="Phone Number"
-                onChangeText={(text) => onChange(text.replace(/[^0-9]/g, ""))}
+                onChangeText={onChange}
                 onBlur={onBlur}
                 value={value}
                 keyboardType="phone-pad"
@@ -181,7 +220,6 @@ const CreateOrEditBookingForm = ({
             <Input className="my-1">
               <InputField
                 type="text"
-                placeholder="Email Address"
                 onChangeText={onChange}
                 onBlur={onBlur}
                 value={value}
@@ -234,6 +272,9 @@ const CreateOrEditBookingForm = ({
       {showDatePicker && (
         <DateTimePicker
           mode="date"
+          display="calendar"
+          is24Hour={true}
+          minimumDate={new Date()}
           value={control._formValues.date || new Date()}
           onChange={(event, selectedDate) => {
             setShowDatePicker(false);
@@ -277,19 +318,6 @@ const CreateOrEditBookingForm = ({
         )}
       />
 
-      {showTimePicker && (
-        <DateTimePicker
-          mode="time"
-          value={control._formValues.startTime || new Date()}
-          onChange={(event, selectedTime) => {
-            setShowTimePicker(false);
-            if (selectedTime) {
-              setValue("startTime", selectedTime);
-            }
-          }}
-        />
-      )}
-
       <Controller
         name="endTime"
         control={control}
@@ -326,11 +354,15 @@ const CreateOrEditBookingForm = ({
       {showTimePicker && (
         <DateTimePicker
           mode="time"
-          value={control._formValues.endTime || new Date()}
+          display="spinner"
+          is24Hour={true}
+          minimumDate={new Date()}
+          minuteInterval={15}
+          value={control._formValues[currentTimeField] || new Date()}
           onChange={(event, selectedTime) => {
             setShowTimePicker(false);
             if (selectedTime) {
-              setValue("endTime", selectedTime);
+              setValue(currentTimeField, selectedTime);
             }
           }}
         />
@@ -348,14 +380,14 @@ const CreateOrEditBookingForm = ({
             <FormControlLabel>
               <FormControlLabelText>Number of Guests</FormControlLabelText>
             </FormControlLabel>
-            <Input className="my-1">
+            <Input>
               <InputField
                 type="text"
                 placeholder="Number of Guests"
                 onChangeText={(text) => onChange(parseInt(text) || 0)}
                 onBlur={onBlur}
                 value={value?.toString()}
-                keyboardType="numeric"
+                keyboardType="phone-pad"
                 maxLength={2}
               />
             </Input>
@@ -370,23 +402,27 @@ const CreateOrEditBookingForm = ({
         )}
       />
 
-      <Button isDisabled={isLoading} onPress={handleSubmit(onSubmit)}>
-        <ButtonText>Submit</ButtonText>
-        {isLoading && <ButtonSpinner animating={isLoading} />}
-      </Button>
-      <Button
-        
-          variant="outline"
-          isDisabled={isLoading}
-          onPress={handleCancel}
-        style={{ marginTop: 10 }}
-          >
-        <ButtonText>Cancel</ButtonText>
-          </Button>
-
-      {errors.restaurantId && <Text>{errors.restaurantId.message}</Text>}
+      {is_authenticated ? (
+        <Button
+          className="mt-4"
+          variant="solid"
+          disabled={isLoading}
+          onPress={handleSubmit(onSubmit)}
+        >
+          <ButtonText>Save</ButtonText>
+          {isLoading && <ButtonSpinner animating={isLoading} />}
+        </Button>
+      ) : (
+        <Button
+          className="mt-4"
+          variant="solid"
+          onPress={() => router.push("/(auth)/login")}
+        >
+          <ButtonText>Login to save</ButtonText>
+        </Button>
+      )}
     </VStack>
   );
 };
 
-export default CreateOrEditBookingForm;
+export default CreateOrEditBooking;

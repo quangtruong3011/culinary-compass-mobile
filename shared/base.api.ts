@@ -1,12 +1,10 @@
 import { BASE_URL } from "@/constants/constants";
+import { RefreshTokenResponse } from "@/features/auth/interfaces/refresh-token.interface";
 import {
   clearCredentials,
   setCredentials,
 } from "@/features/auth/store/auth.slice";
-import {
-  removeAuthTokens,
-  saveAuthTokens,
-} from "@/features/auth/utils/auth.storage";
+
 import { RootState } from "@/store/store";
 import { fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
@@ -28,7 +26,6 @@ const baseQueryWithReauth = async (args: any, api: any, extraOptions: any) => {
     const refreshToken = (api.getState() as RootState).auth.refresh_token;
 
     if (refreshToken) {
-      // Attempt to refresh token
       const refreshResult = await baseQuery(
         {
           url: "/auth/refresh-token",
@@ -40,40 +37,29 @@ const baseQueryWithReauth = async (args: any, api: any, extraOptions: any) => {
       );
 
       if (refreshResult.data) {
-        const responseData = refreshResult.data as {
-          data?: {
-            access_token: string;
-            refresh_token: string;
-            user?: any;
-          };
-        };
+        const responseData = refreshResult.data as RefreshTokenResponse;
 
         if (responseData.data) {
           const { access_token, refresh_token, user } = responseData.data;
 
-          // Save new tokens and update state
-          await saveAuthTokens(access_token, refresh_token);
-          // api.dispatch(
-          //   setCredentials({
-          //     user: user || (api.getState() as RootState).auth.user, // Keep existing user if not provided
-          //     access_token,
-          //     refresh_token,
-          //     is_authenticated: true,
-          //   })
-          // );
+          api.dispatch(
+            setCredentials({
+              user: user || (api.getState() as RootState).auth.user,
+              access_token,
+              refresh_token,
+              is_authenticated: true,
+            })
+          );
 
-          // Retry the original request with new token
           return await baseQuery(args, api, extraOptions);
         }
       }
     }
 
-    // If refresh failed, clear credentials
-    await removeAuthTokens();
-    // api.dispatch(clearCredentials());
+    api.dispatch(clearCredentials());
   }
 
-  console.log("baseQueryWithReauth", result);
+  // console.log("baseQueryWithReauth", result.error);
   return result;
 };
 

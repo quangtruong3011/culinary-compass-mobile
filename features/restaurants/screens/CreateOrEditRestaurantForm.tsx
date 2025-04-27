@@ -1,5 +1,5 @@
 import { VStack } from "@/components/ui/vstack";
-import { restaurantSchema } from "@/lib/validation/restaurantSchema";
+import { restaurantSchema } from "@/lib/validation/restaurant-schema";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -44,20 +44,26 @@ import { ChevronDownIcon } from "@/components/ui/icon";
 import { Textarea, TextareaInput } from "@/components/ui/textarea";
 import { CreateOrEditRestaurantDto } from "../interfaces/create-or-edit-restaurant.interface";
 import moment from "moment";
+import { useSelector } from "react-redux";
+import { RootState } from "@/store/store";
+import {
+  useCreateRestaurantMutation,
+  useUpdateRestaurantMutation,
+} from "../api/restaurant.api";
+import {
+  Toast,
+  ToastDescription,
+  ToastTitle,
+  useToast,
+} from "@/components/ui/toast";
+import * as FileSystem from "expo-file-system";
 
-export interface CreateOrEditRestaurantFormProps {
-  onSubmit: (data: CreateOrEditRestaurantDto) => void;
-  isLoading: boolean;
-  mode?: "create" | "edit";
-  initialValues?: Partial<CreateOrEditRestaurantDto>;
-}
+const CreateOrEditRestaurantForm = () => {
+  const toast = useToast();
+  const restaurant = useSelector(
+    (state: RootState) => state?.restaurant?.currentRestaurant
+  );
 
-const CreateOrEditRestaurantForm = ({
-  onSubmit,
-  isLoading,
-  mode,
-  initialValues,
-}: CreateOrEditRestaurantFormProps) => {
   const {
     control,
     handleSubmit,
@@ -67,27 +73,27 @@ const CreateOrEditRestaurantForm = ({
     reset,
   } = useForm<CreateOrEditRestaurantDto>({
     resolver: zodResolver(restaurantSchema),
-    defaultValues: {
-      ...initialValues,
-      images: initialValues?.images || [],
-    },
   });
 
+  const [create, { isLoading: isCreating }] = useCreateRestaurantMutation();
+  const [update, { isLoading: isUpdating }] = useUpdateRestaurantMutation();
+
+  const isLoading = isCreating || isUpdating;
+
   useEffect(() => {
-    if (initialValues) {
-      reset(initialValues);
+    if (restaurant) {
+      reset({
+        ...restaurant,
+        website: restaurant.website || "",
+        openingTime: moment(restaurant.openingTime).toDate(),
+        closingTime: moment(restaurant.closingTime).toDate(),
+        deletedImages: []
+      });
     }
-  }, [initialValues, reset]);
+  }, [restaurant, reset]);
 
   const images = watch("images") || [];
-
-  const [deletedExistingImages, setDeletedExistingImages] = useState<number[]>(
-    []
-  );
-
-  const removeExistingImage = (index: number) => {
-    setDeletedExistingImages([...deletedExistingImages, index]);
-  };
+  const deletedImages = watch("deletedImages") || [];
 
   const [selectedProvince, setSelectedProvince] = useState<Provinces | null>(
     null
@@ -108,12 +114,6 @@ const CreateOrEditRestaurantForm = ({
     setShowTimePicker(true);
   };
 
-  const formatTime = (date: Date | undefined) => {
-    if (!date) return "";
-    const formattedTime = moment(date).format("hh:mm A");
-    return formattedTime === "Invalid date" ? "" : formattedTime;
-  };
-
   const pickImages = async () => {
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
     if (status !== "granted") {
@@ -129,17 +129,14 @@ const CreateOrEditRestaurantForm = ({
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsMultipleSelection: true,
-      aspect: [4, 3],
+      aspect: [1, 1],
       quality: 0.8,
       selectionLimit: MAX_IMAGES - images.length,
     });
 
     if (!result.canceled && result.assets.length > 0) {
       const newImages = result.assets.map((asset) => ({
-        uri: asset.uri,
-        fileName: asset.fileName ?? undefined,
-        fileSize: asset.fileSize,
-        type: asset.type,
+        imageUrl: asset.uri,
       }));
       setValue("images", [...images, ...newImages], {
         shouldValidate: true,
@@ -149,8 +146,81 @@ const CreateOrEditRestaurantForm = ({
 
   const removeImage = (index: number) => {
     const newImages = [...images];
-    newImages.splice(index, 1);
+    const removedImage = newImages.splice(index, 1)[0];
+
     setValue("images", newImages);
+
+    if (removedImage?.publicId) {
+      setValue("deletedImages", [...deletedImages, removedImage], {
+        shouldValidate: true,
+      });
+    }
+  };
+
+  const onSubmit = async (data: CreateOrEditRestaurantDto) => {
+    console.log("Form data:", data);
+    try {
+      // Convert local images to base64
+      const updatedImages = await Promise.all(
+        (images || []).map(async (image) =>
+          image.imageUrl.startsWith("file://")
+            ? {
+                ...image,
+                imageUrl: `data:image/jpeg;base64,${await FileSystem.readAsStringAsync(
+                  image.imageUrl,
+                  {
+                    encoding: FileSystem.EncodingType.Base64,
+                  }
+                )}`,
+              }
+            : image
+        )
+      );
+      data.images = updatedImages;
+
+      // Decide whether to create or update
+      const action = restaurant
+        ? update({ id: restaurant.id as number, body: data }).unwrap()
+        : create(data).unwrap();
+
+      await action;
+
+      toast.show({
+        placement: "top right",
+        render: ({ id }) => (
+          <Toast nativeID={`toast-${id}`} action="success" variant="outline">
+            <VStack space="xs">
+              <ToastTitle>Success</ToastTitle>
+              <ToastDescription>
+                {restaurant
+                  ? "Restaurant updated successfully"
+                  : "Restaurant created successfully"}
+              </ToastDescription>
+            </VStack>
+          </Toast>
+        ),
+      });
+
+      // Optionally reset form or redirect here
+      reset();
+      // navigation.goBack(); // nếu muốn tự động quay lại màn trước
+    } catch (error) {
+      toast.show({
+        placement: "top right",
+        render: ({ id }) => (
+          <Toast nativeID={`toast-${id}`} action="error" variant="outline">
+            <VStack space="xs">
+              <ToastTitle>Error</ToastTitle>
+              <ToastDescription>
+                {restaurant
+                  ? "Failed to update restaurant"
+                  : "Failed to create restaurant"}
+              </ToastDescription>
+            </VStack>
+          </Toast>
+        ),
+      });
+    }
   };
 
   return (
@@ -169,32 +239,19 @@ const CreateOrEditRestaurantForm = ({
               isRequired={true}
               isDisabled={isLoading}
             >
-              {/* Kết hợp cả initial images và new images vào cùng một FlatList */}
-              {(mode === "edit" && (initialValues?.images?.length || 0) > 0) ||
-              images.length > 0 ? (
-                <FlatList
-                  data={
-                    mode === "edit"
-                      ? [...(initialValues?.images || []), ...images]
-                      : images
-                  }
-                  renderItem={({ item, index }) => (
-                    <RenderImageItem
-                      item={item}
-                      index={index}
-                      removeImage={
-                        index < (initialValues?.images?.length || 0) &&
-                        mode === "edit"
-                          ? removeExistingImage
-                          : removeImage
-                      }
-                    />
-                  )}
-                  keyExtractor={(_, index) => index.toString()}
-                  numColumns={3}
-                  scrollEnabled={false}
-                />
-              ) : null}
+              <FlatList
+                data={images}
+                renderItem={({ item, index }) => (
+                  <RenderImageItem
+                    imageUrl={item.imageUrl}
+                    index={index}
+                    removeImage={removeImage}
+                  />
+                )}
+                keyExtractor={(_, index) => index.toString()}
+                numColumns={3}
+                scrollEnabled={false}
+              />
 
               <Button
                 onPress={pickImages}
@@ -543,9 +600,9 @@ const CreateOrEditRestaurantForm = ({
             <Input className="my-1">
               <InputField
                 type="text"
-                onChangeText={onChange}
+                onChangeText={(text) => onChange(text || "")}
                 onBlur={onBlur}
-                value={value}
+                value={value || ""}
               />
             </Input>
             {errors.website && (
@@ -576,7 +633,7 @@ const CreateOrEditRestaurantForm = ({
                 <InputField
                   type="text"
                   placeholder="hh:mm AM/PM"
-                  value={formatTime(value)}
+                  value={value && moment(value).format("hh:mm A")}
                   onChange={onChange}
                   onBlur={onBlur}
                   onPressIn={() => handleTimeChange("openingTime")}
@@ -611,7 +668,7 @@ const CreateOrEditRestaurantForm = ({
                   placeholder="hh:mm AM/PM"
                   onChange={onChange}
                   onBlur={onBlur}
-                  value={formatTime(value)}
+                  value={value && moment(value).format("hh:mm A")}
                   onPressIn={() => handleTimeChange("closingTime")}
                 />
               </Input>

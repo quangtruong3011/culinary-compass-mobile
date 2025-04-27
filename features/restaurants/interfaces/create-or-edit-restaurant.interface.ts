@@ -16,6 +16,7 @@ export interface CreateOrEditRestaurantDto {
   openingTime: Date;
   closingTime: Date;
   images: RestaurantImage[];
+  deletedImages?: RestaurantImage[];
 }
 
 

@@ -1,53 +1,65 @@
+import { PAGE, PAGE_SIZE } from "@/constants/constants";
 import { useAuth } from "@/features/auth/hooks/useAuth";
-import { useGetBookingsByUserQuery } from "@/features/bookings/api/booking.api";
-import { Booking } from "@/features/bookings/interfaces/booking.interface";
-import BookingCardForUser, { BookingStatus } from "@/features/bookings/screens/BookingCardForUser";
+import { useFindAllBookingForUserQuery } from "@/features/bookings/api/booking.api";
+import { BookingCardForUser } from "@/features/bookings/screens/BookingCardForUser";
 import BookingListHeader from "@/features/bookings/screens/BookingListHeader";
-import { useState } from "react";
-import { FlatList, Text } from "react-native";
-
-const PASE_SIZE = 10;
+import { useCallback, useEffect, useState } from "react";
+import { FlatList } from "react-native";
+import { RefreshControl } from "react-native";
 
 export default function BookingScreen() {
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useState(PAGE);
   const [isManualRefreshing, setIsManualRefreshing] = useState(false);
-  const [isOpenModal, setIsOpenModal] = useState(false);
-  const [userId, setUserId] = useState<number | null>(null);
-  const [bookingId, setBookingId] = useState<number | null>(null);
 
-  const { user } = useAuth();
+  const { data, isLoading, isError, refetch } = useFindAllBookingForUserQuery({
+    page: PAGE,
+    limit: PAGE_SIZE,
+    filterText: "",
+  });
 
-  const { data, isLoading, isError, refetch, isFetching } =
-    useGetBookingsByUserQuery({
-      page: page,
-      limit: PASE_SIZE,
-      filterText: "",
-      userId: user?.id as number,
-    });
-    console.log("data", data);
+  const totalPages = data?.data?.totalPages || 0;
+  const hasMoreData = page < totalPages;
 
-  const bookings = [...(data?.data.results || [])].sort(
-    (a, b) => new Date(b.createAt).getTime() - new Date(a.createAt).getTime()
-  );
+  const handleRefresh = useCallback(async () => {
+    setIsManualRefreshing(true);
+    setPage(1);
+    try {
+      await refetch();
+    } finally {
+      setIsManualRefreshing(false);
+    }
+  }, [refetch]);
+
+  const handleLoadMore = useCallback(() => {
+    if (!isLoading && hasMoreData) {
+      setPage((prevPage) => prevPage + 1);
+    }
+  }, [isLoading, hasMoreData]);
 
   return (
     <>
       <FlatList
-        data={bookings}
+        data={data?.data.results}
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
           <BookingCardForUser
             id={item.id}
-            restaurantId={item.restaurantId}
             date={item.date}
             startTime={item.startTime}
             endTime={item.endTime}
             numberOfSeats={item.guests}
-            status={item.status as BookingStatus}
-            onActionComplete={refetch}
           />
         )}
         ListHeaderComponent={BookingListHeader}
+        refreshing={isLoading}
+        refreshControl={
+          <RefreshControl
+            refreshing={isManualRefreshing}
+            onRefresh={handleRefresh}
+          />
+        }
+        onEndReached={handleLoadMore}
+        onEndReachedThreshold={0.5}
       />
     </>
   );

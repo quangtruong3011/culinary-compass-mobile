@@ -1,11 +1,4 @@
+import { PaginatedResponse } from "@/shared/api-response";
 import { Restaurant } from "./restaurant.interface";
 
-export interface GetAllRestaurants {
-  data: {
-    results: Restaurant[];
-    total: number;
-    page: string;
-    limit: string;
-    totalPages: number;
-  };
-}
+export interface GetAllRestaurants extends PaginatedResponse<Restaurant> {}
