@@ -1,14 +1,4 @@
-export interface GetBooking {
-  data: {
-    id: number;
-    restaurantId: number;
-    name: string;
-    phone: string;
-    email: string;
-    date: Date;
-    startTime: Date;
-    endTime: Date;
-    guests: number;
-    isConfirmed: boolean;
-  };
-}
+import { SingleResponse } from "@/shared/api-response";
+import { Booking } from "./booking.interface";
+
+export interface GetBookingDto extends SingleResponse<Booking> {}

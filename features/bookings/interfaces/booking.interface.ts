@@ -1,11 +1,10 @@
 export interface Booking {
   id: number;
   userId: number;
+  restaurantId: number;
   name: string;
   phone: string;
   email?: string;
-  restaurantId: number;
-  restaurantName?: string;
   date: Date;
   startTime: Date;
   endTime: Date;

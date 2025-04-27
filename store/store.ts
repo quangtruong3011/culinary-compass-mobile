@@ -20,6 +20,7 @@ const rootReducer = combineReducers({
   auth: authReducer,
   [authApi.reducerPath]: authApi.reducer,
   [userApi.reducerPath]: userApi.reducer,
+  user: userApi.reducer,
   [restaurantApi.reducerPath]: restaurantApi.reducer,
   restaurant: restaurantReducer,
   [tableApi.reducerPath]: tableApi.reducer,

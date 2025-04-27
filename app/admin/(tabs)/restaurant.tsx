@@ -3,43 +3,43 @@ import RestaurantCardForAdmin from "@/features/restaurants/screens/RestaurantCar
 import { useCallback, useEffect, useState } from "react";
 import { ActivityIndicator, FlatList, RefreshControl } from "react-native";
 import moment from "moment";
-import { Text } from "@/components/ui/text";
-import { Link } from "expo-router";
-import { PAGE_SIZE } from "@/constants/constants";
+import { PAGE, PAGE_SIZE } from "@/constants/constants";
+import RestaurantListHeader from "@/features/restaurants/screens/RestaurantListHeader";
+import RestaurantListEmpty from "@/features/restaurants/screens/RestaurantListEmpty";
 
 export default function RestaurantAdminScreen() {
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useState(PAGE);
+  const [filterText, setFilterText] = useState("");
+  const [debouncedFilterText, setDebouncedFilterText] = useState("");
+  const [isManualRefreshing, setIsManualRefreshing] = useState(false);
+
   const { data, isLoading, isError, refetch, isFetching } =
     useFindAllRestaurantsForAdminQuery({
       page: page,
       limit: PAGE_SIZE,
-      filterText: "",
+      filterText: debouncedFilterText.trim(),
     });
 
-  const [refreshing, setRefreshing] = useState(false);
+  const totalPages = data?.data?.totalPages || 0;
+  const hasMoreData = page < totalPages;
 
-  const onRefresh = useCallback(() => {
-    setRefreshing(true);
+  const handleFilterTextChange = (text: string) => {
+    setFilterText(text);
+  };
+
+  const handleRefresh = useCallback(() => {
+    setIsManualRefreshing(true);
     setPage(1);
     refetch().finally(() => {
-      setRefreshing(false);
+      setIsManualRefreshing(false);
     });
   }, [refetch]);
 
-  const loadMore = useCallback(() => {
-    if (
-      !isLoading &&
-      data?.data &&
-      page < data.data.totalPages &&
-      !isFetching
-    ) {
-      setPage((prev) => prev + 1);
+  const handleLoadMore = useCallback(() => {
+    if (!isFetching && hasMoreData) {
+      setPage((prevPage) => prevPage + 1);
     }
   }, [isLoading, data, page, isFetching]);
-
-  const onEndReached = useCallback(() => {
-    loadMore();
-  }, [loadMore]);
 
   return (
     <FlatList
@@ -54,18 +54,23 @@ export default function RestaurantAdminScreen() {
           closingTime={moment(item.closingTime).format("HH:mm")}
         />
       )}
-      ListHeaderComponent={() => (
-        <Link href={`/admin/restaurant/create`}>Restaurants</Link>
-      )}
-      ListEmptyComponent={!isLoading ? <Text>No restaurants found</Text> : null}
-      keyExtractor={(item) => (item.id ?? "").toString()}
-      showsVerticalScrollIndicator={false}
-      refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      ListHeaderComponent={
+        <RestaurantListHeader
+          filterText={filterText}
+          onFilterTextChange={handleFilterTextChange}
+        />
       }
-      onEndReached={onEndReached}
+      ListEmptyComponent={<RestaurantListEmpty />}
+      keyExtractor={(item) => (item.id ?? "").toString()}
+      refreshControl={
+        <RefreshControl
+          refreshing={isManualRefreshing}
+          onRefresh={handleRefresh}
+        />
+      }
+      onEndReached={handleLoadMore}
       onEndReachedThreshold={0.5}
-      contentContainerStyle={{ paddingBottom: 20 }}
+      showsVerticalScrollIndicator={false}
       ListFooterComponent={
         isFetching && page > 1 ? (
           <ActivityIndicator size="large" color="#0000ff" />

@@ -3,99 +3,76 @@ import { Button, ButtonIcon, ButtonText } from "@/components/ui/button";
 import { HStack } from "@/components/ui/hstack";
 import { VStack } from "@/components/ui/vstack";
 import React from "react";
-import { Pressable, StyleSheet } from "react-native";
+import { TouchableOpacity } from "react-native";
 import { Text } from "@/components/ui/text";
 import { useRouter } from "expo-router";
-import { EditIcon, TrashIcon } from "@/components/ui/icon";
+import { ClockIcon, Icon, TrashIcon } from "@/components/ui/icon";
 import moment from "moment";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { setCurrentBooking } from "../store/booking.slice";
-import { RootState } from "@/store/store";
-import { useFindBookingForUserQuery } from "../api/booking.api";
+import { AppDispatch } from "@/store/store";
+import { bookingApi } from "../api/booking.api";
+import { Card } from "@/components/ui/card";
 
 interface BookingListForUserProps {
   id: number;
-  restaurantId: number;
   date: Date;
   startTime: Date;
   endTime: Date;
   numberOfSeats: number;
   isConfirmed: boolean;
 }
+
+type BookingStatus = "pending" | "confirmed" | "cancelled";
+
 const BookingCardForUser = ({
   id,
-  restaurantId,
   date,
   startTime,
   endTime,
   numberOfSeats,
   isConfirmed,
 }: BookingListForUserProps) => {
+  const dispatch = useDispatch<AppDispatch>();
   const router = useRouter();
-  const dispatch = useDispatch();
 
-  const restaurant = useSelector(
-    (state: any) => state.restaurant.restaurants.find((r: any) => r.id === restaurantId));
+  const handleEditPress = async () => {
+    const { data } = await dispatch(
+      bookingApi.endpoints.findOneBookingForUser.initiate(id)
+    );
 
-  const { data } = useFindBookingForUserQuery(id as number);
-
-  const handleEditPress = () => {
-    dispatch(setCurrentBooking(data?.data));
-    router.push(`../user/booking/${id}`);
+    if (data) {
+      dispatch(setCurrentBooking(data.data));
+      router.push(`/user/booking/${id}`);
+    }
   };
 
   return (
-    <Box style={styles.box}>
-      <HStack className="justify-between items-center">
-        <VStack space="xs">
-          {/* <Text size="lg" className="font-semibold">
-            Retaurant: {restaurant?.name}
-          </Text> */}
-          <Text size="lg" className="font-semibold">
-            {moment(date).format("MMMM Do YYYY")}
-          </Text>
-          <Text size="sm" className="text-gray-500">
-            {moment(startTime).format("h:mm A")} -{" "}
-            {moment(endTime).format("h:mm A")}
-          </Text>
-          <Text size="sm" className="text-gray-500">
-            Number of Seats: {numberOfSeats}
-          </Text>
-          <Text size="sm" className="text-gray-500">
-            Status: {isConfirmed ? "Confirmed" : "Pending"}
-          </Text>
-        </VStack>
-        <HStack space="xs">
-          <Button variant="outline" onPress={handleEditPress}>
-            <ButtonIcon as={EditIcon} size="sm" />
-            <ButtonText>Edit</ButtonText>
-          </Button>
-          <Button
-            variant="solid"
-            style={{ backgroundColor: "red" }}
-            onPress={() => console.log("Cancel booking")}
-          >
-            <ButtonIcon as={TrashIcon} size="sm" />
-            <ButtonText>Cancel</ButtonText>
+    <TouchableOpacity onPress={handleEditPress}>
+      <Card>
+        <HStack className="justify-between items-center">
+          <VStack space="xs">
+            <Text className="text-lg font-semibold">
+              {moment(date).format("DD/MM/YYYY")}
+            </Text>
+            <HStack space="xs" className="items-center">
+              <Icon as={ClockIcon} size="sm" />
+              <Text>{moment(startTime).format("HH:mm")}</Text>
+              <Text>-</Text>
+              <Text>{moment(endTime).format("HH:mm")}</Text>
+            </HStack>
+            <Text className="text-sm text-gray-500">
+              Number of guests: {numberOfSeats} guests
+            </Text>
+          </VStack>
+          <Button>
+            <ButtonIcon as={TrashIcon} size="md" />
+            {!isConfirmed && <ButtonText>Cancel</ButtonText>}
           </Button>
         </HStack>
-      </HStack>
-    </Box>
+      </Card>
+    </TouchableOpacity>
   );
 };
 
 export default BookingCardForUser;
-
-const styles = StyleSheet.create({
-  box: {
-    padding: 16,
-    borderRadius: 8,
-    backgroundColor: "#fff",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
-    marginBottom: 8,
-  },
-});

@@ -1,23 +1,18 @@
 import { CloseIcon, Icon } from "@/components/ui/icon";
 import { Dimensions, Pressable, View } from "react-native";
 import { Image } from "expo-image";
-import {
-  LocalImage,
-  ServerImage,
-} from "../interfaces/restaurant-image.interface";
 
 const screenWidth = Dimensions.get("window").width;
 
 const RenderImageItem = ({
-  item,
+  imageUrl,
   index,
   removeImage,
 }: {
-  item: LocalImage | ServerImage;
+  imageUrl: string;
   index: number;
   removeImage: (index: number) => void;
 }) => {
-  const imageUri = "imageUrl" in item ? item.imageUrl : item.uri;
   return (
     <View
       style={{
@@ -28,7 +23,7 @@ const RenderImageItem = ({
       }}
     >
       <Image
-        source={{ uri: imageUri }}
+        source={imageUrl}
         style={{
           width: "100%",
           height: (screenWidth * 1) / 3,

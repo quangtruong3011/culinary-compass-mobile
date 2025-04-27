@@ -1,24 +1,5 @@
 import * as z from "zod";
 
-const localItemSchema = z.object({
-  uri: z.string(),
-  fileName: z.string().optional(),
-  fileSize: z.number().optional(),
-  type: z.string().optional(),
-});
-
-const serverItemSchema = z.object({
-  id: z.number().optional(),
-  imageUrl: z.string(),
-  publicId: z.string(),
-  isMain: z.boolean().optional(),
-});
-
-export const restaurantImageSchema = z.union([
-  localItemSchema,
-  serverItemSchema,
-]);
-
 export const restaurantSchema = z.object({
   name: z.string().min(1, "Please enter a restaurant name"),
   address: z.string().min(1, "Please enter an address"),
@@ -48,7 +29,24 @@ export const restaurantSchema = z.object({
     invalid_type_error: "Invalid closing time",
   }),
   images: z
-    .array(restaurantImageSchema)
+    .array(
+      z.object({
+        id: z.number().optional(),
+        publicId: z.string().optional(),
+        imageUrl: z.string().url("Please enter a valid image URL"),
+        isMain: z.boolean().optional(),
+      })
+    )
     .min(1, "Please upload at least one image")
     .max(6, "You can upload a maximum of 6 images"),
+  deletedImages: z
+    .array(
+      z.object({
+        id: z.number().optional(),
+        publicId: z.string().optional(),
+        imageUrl: z.string().url("Please enter a valid image URL"),
+        isMain: z.boolean().optional(),
+      })
+    )
+    .optional(),
 });

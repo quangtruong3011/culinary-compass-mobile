@@ -1,13 +1,13 @@
-import {
-  GetMeResponse,
-  LoginResponse,
-  RefreshTokenResponse,
-  RegisterResponse,
-} from "../interfaces/auth.interface";
+import { LoginResponse, RegisterResponse } from "../interfaces/auth.interface";
 import { LoginFormData, RegisterFormData } from "@/lib/validation/authSchema";
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { UpdateUserRoleRequest } from "../interfaces/update-user-role.interface";
 import baseQueryWithReauth from "@/shared/base.api";
+import {
+  RefreshTokenRequest,
+  RefreshTokenResponse,
+} from "../interfaces/refresh-token.interface";
+import { GetUserDto } from "@/features/users/interfaces/get-user.interface";
 
 export const authApi = createApi({
   reducerPath: "authApi",
@@ -34,24 +34,18 @@ export const authApi = createApi({
         return response;
       },
     }),
-    getMe: builder.query<GetMeResponse, void>({
+    getMe: builder.query<GetUserDto, void>({
       query: () => ({
         url: "/auth/me",
         method: "POST",
       }),
-      transformResponse: (response: GetMeResponse) => {
-        return response;
-      },
     }),
-    refreshToken: builder.mutation<RefreshTokenResponse, string>({
-      query: (refreshToken: string) => ({
+    refreshToken: builder.mutation<RefreshTokenResponse, RefreshTokenRequest>({
+      query: (body: RefreshTokenRequest) => ({
         url: "/auth/refresh-token",
         method: "POST",
-        body: { refresh_token: refreshToken },
+        body,
       }),
-      transformResponse: (response: RefreshTokenResponse) => {
-        return response;
-      },
     }),
     updateUserRoles: builder.mutation({
       query: (data: UpdateUserRoleRequest) => ({

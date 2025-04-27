@@ -3,7 +3,7 @@ import { bookingApi } from "../api/booking.api";
 import { BookingState } from "../interfaces/booking-state.interface";
 
 const initialState: Partial<BookingState> = {
-  bookings: [],
+  bookings: null,
   currentBooking: null,
   isLoading: false,
   error: null,
@@ -19,6 +19,9 @@ const bookingSlice = createSlice({
     setCurrentBooking(state, action) {
       state.currentBooking = action.payload;
     },
+    clearCurrentBooking(state) {
+      state.currentBooking = null;
+    },
     setLoading(state, action) {
       state.isLoading = action.payload;
     },
@@ -28,7 +31,7 @@ const bookingSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder.addMatcher(
-      bookingApi.endpoints.findBookingForUser.matchFulfilled,
+      bookingApi.endpoints.findOneBookingForUser.matchFulfilled,
       (state, { payload }) => {
         state.currentBooking = payload.data;
       }
@@ -36,6 +39,11 @@ const bookingSlice = createSlice({
   },
 });
 
-export const { setBookings, setCurrentBooking, setLoading, setError } =
-  bookingSlice.actions;
+export const {
+  setBookings,
+  setCurrentBooking,
+  clearCurrentBooking,
+  setLoading,
+  setError,
+} = bookingSlice.actions;
 export const bookingReducer = bookingSlice.reducer;

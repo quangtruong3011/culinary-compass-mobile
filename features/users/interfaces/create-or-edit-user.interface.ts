@@ -1,10 +1,8 @@
-export interface User {
-  id: number;
+export interface CreateOrEditUserDto {
   name?: string;
   email: string;
   phone?: string;
-  gender?: string;
   birthOfDate?: Date;
+  gender?: string;
   imageUrl?: string;
-  roles: string[];
 }

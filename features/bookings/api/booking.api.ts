@@ -5,9 +5,9 @@ import { Booking } from "../interfaces/booking.interface";
 import baseQueryWithReauth from "@/shared/base.api";
 import { CreateOrEditBookingDto } from "../interfaces/create-or-edit-booking.interface";
 import { GetAllBookingForUser } from "../interfaces/get-all-booking-for-user";
-import { BookingParam } from "../interfaces/booking-param.interface";
-import { GetBooking } from "../interfaces/get-booking.interface";
+import { GetBookingDto } from "../interfaces/get-booking.interface";
 import { GetAllBooking } from "../interfaces/get-all-booking.interface";
+import { PaginationOptions } from "@/shared/pagination.interface";
 
 export const bookingApi = createApi({
   reducerPath: "bookingApi",
@@ -21,29 +21,14 @@ export const bookingApi = createApi({
       }),
     }),
 
-    getAllBookings: builder.query<GetAllBooking, void>({
-      query: () => ({
-        url: "/bookings",
-        method: "GET",
-        params: {
-          page: 1,
-          limit: 10,
-        },
-      }),
-      transformResponse: (response: any) => {
-        return response;
-      },
-    }),
-
-    getBookingsByUser: builder.query<GetAllBookingForUser, BookingParam>({
-      query: (options: BookingParam) => ({
-        url: `/bookings/user`,
+    findAllBookingForAdmin: builder.query<GetAllBooking, PaginationOptions>({
+      query: (options: PaginationOptions) => ({
+        url: "/bookings/find-all-for-admin",
         method: "GET",
         params: {
           page: options.page,
           limit: options.limit,
           filterText: options.filterText,
-          userId: options.userId,
         },
       }),
       transformResponse: (response: any) => {
@@ -51,9 +36,27 @@ export const bookingApi = createApi({
       },
     }),
 
-    findBookingForUser: builder.query<GetBooking, number>({
+    findAllBookingForUser: builder.query<
+      GetAllBookingForUser,
+      PaginationOptions
+    >({
+      query: (options: PaginationOptions) => ({
+        url: `/bookings/find-all-for-user`,
+        method: "GET",
+        params: {
+          page: options.page,
+          limit: options.limit,
+          filterText: options.filterText,
+        },
+      }),
+      transformResponse: (response: any) => {
+        return response;
+      },
+    }),
+
+    findOneBookingForUser: builder.query<GetBookingDto, number>({
       query: (id) => ({
-        url: `/bookings/${id}`,
+        url: `/bookings/find-one-for-user/${id}`,
         method: "GET",
       }),
 
@@ -63,13 +66,13 @@ export const bookingApi = createApi({
     }),
 
     updateBooking: builder.mutation<
-      any,
-      { id: number; data: CreateOrEditBookingDto }
+      GetBookingDto,
+      { id: number; body: CreateOrEditBookingDto }
     >({
-      query: ({ id, data }) => ({
+      query: ({ id, body }) => ({
         url: `/bookings/${id}`,
         method: "PATCH",
-        body: data,
+        body,
       }),
     }),
 
@@ -95,9 +98,9 @@ export const bookingApi = createApi({
 
 export const {
   useCreateBookingMutation,
-  useGetAllBookingsQuery,
-  useGetBookingsByUserQuery,
-  useFindBookingForUserQuery,
+  useFindAllBookingForAdminQuery,
+  useFindAllBookingForUserQuery,
+  useFindOneBookingForUserQuery,
   useUpdateBookingMutation,
   useConfirmBookingMutation,
   // useDeleteBookingMutation,

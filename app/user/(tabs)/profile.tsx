@@ -1,5 +1,5 @@
 import RestaurantOpeningConfirmationModal from "@/components/RestaurantOpeningConfirmationModal";
-import { Avatar } from "@/components/ui/avatar";
+import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { Button, ButtonText } from "@/components/ui/button";
 import { HStack } from "@/components/ui/hstack";
 import { IconSymbol } from "@/components/ui/IconSymbol";
@@ -38,8 +38,16 @@ export default function UserProfile() {
     <VStack>
       <HStack className="justify-between items-center p-4 bg-white dark:bg-gray-900">
         <HStack className="gap-2 items-center">
-          <Avatar>
-            <IconSymbol size={28} name="person.fill" color="white" />
+          <Avatar size="lg">
+            {user?.imageUrl ? (
+              <AvatarImage
+                source={{ uri: user.imageUrl }}
+                alt="User Avatar"
+                className="rounded-full"
+              />
+            ) : (
+              <IconSymbol size={28} name="person.fill" color="white" />
+            )}
           </Avatar>
           {user && (
             <Text className="text-lg font-bold text-gray-900 dark:text-white">
@@ -70,6 +78,9 @@ export default function UserProfile() {
 
       {is_authenticated && (
         <VStack className="p-4 gap-4">
+          <Button onPress={() => router.push("/user/[id]")}>
+            <ButtonText>My Profile</ButtonText>
+          </Button>
           {isAdmin ? (
             <Button onPress={() => router.push("/admin")}>
               <ButtonText>Restaurant Manager</ButtonText>
@@ -89,13 +100,6 @@ export default function UserProfile() {
           </Button>
         </VStack>
       )}
-
-      <RestaurantOpeningConfirmationModal
-        isOpen={isOpenModal}
-        onConfirm={handleConfirm}
-        onCancel={handleCloseModal}
-        title="Are you sure you want to open the restaurant?"
-      />
     </VStack>
   );
 }

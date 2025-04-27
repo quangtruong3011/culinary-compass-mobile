@@ -1,5 +1,4 @@
+import { SingleResponse } from "@/shared/api-response";
 import { Restaurant } from "./restaurant.interface";
 
-export interface GetRestaurant {
-  data: Restaurant;
-}
+export interface GetRestaurantDto extends SingleResponse<Restaurant> {}

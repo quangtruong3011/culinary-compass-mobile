@@ -1,21 +1,29 @@
-import { BASE_URL } from "@/constants/constants";
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { RootState } from "@/store/store";
+import { createApi } from "@reduxjs/toolkit/query/react";
+import baseQueryWithReauth from "@/shared/base.api";
+import { GetUserDto } from "../interfaces/get-user.interface";
+import { CreateOrEditUserDto } from "../interfaces/create-or-edit-user.interface";
+import { SingleResponse } from "@/shared/api-response";
 
 export const userApi = createApi({
   reducerPath: "userApi",
-  baseQuery: fetchBaseQuery({
-    baseUrl: BASE_URL,
-    prepareHeaders: (headers, { getState }) => {
-      const state = getState() as RootState;
-      const accessToken = state.auth.access_token;
-      if (accessToken) {
-        headers.set("Authorization", `Bearer ${accessToken}`);
-      }
-      return headers;
-    },
+  baseQuery: baseQueryWithReauth,
+  tagTypes: ["User"],
+  endpoints: (builder) => ({
+    findOneUser: builder.query({
+      query: (id) => `/users/${id}`,
+    }),
+    updateUser: builder.mutation<
+      GetUserDto,
+      { id: number; body: CreateOrEditUserDto }
+    >({
+      query: ({ id, body }) => ({
+        url: `/users/${id}`,
+        method: "PATCH",
+        body,
+      }),
+      invalidatesTags: ["User"],
+    }),
   }),
-  endpoints: (builder) => ({}),
 });
 
-export const {} = userApi;
+export const { useUpdateUserMutation } = userApi;

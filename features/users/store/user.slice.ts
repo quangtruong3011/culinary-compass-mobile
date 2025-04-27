@@ -1,7 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { userApi } from "../api/user.api";
+import { UserState } from "../interfaces/user-state.interface";
 
-const inittialSate = {
+const inittialSate: UserState = {
   user: null,
   isLoading: false,
   error: null,
@@ -21,7 +21,10 @@ const userSlice = createSlice({
       state.error = action.payload;
     },
   },
-  extraReducers: (builder) => {},
+  extraReducers: (builder) => {
+    // Update user
+    
+  },
 });
 
 export const { setUser, setLoading, setError } = userSlice.actions;

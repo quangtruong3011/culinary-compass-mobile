@@ -1,15 +1,6 @@
-export interface LocalImage {
-  uri: string;
-  fileName?: string;
-  fileSize?: number;
-  type?: string;
-}
-
-export interface ServerImage {
+export interface RestaurantImage {
   id?: number;
+  publicId?: string;
   imageUrl: string;
-  publicId: string;
   isMain?: boolean;
 }
-
-export type RestaurantImage = LocalImage | ServerImage;

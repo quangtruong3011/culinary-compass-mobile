@@ -1,5 +1,4 @@
 export interface CreateOrEditBookingDto {
-  userId: number;
   restaurantId: number;
   name: string;
   phone: string;
