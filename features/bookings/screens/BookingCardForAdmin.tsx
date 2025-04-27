@@ -15,7 +15,13 @@ import { useUpdateBookingStatusMutation } from "../api/booking.api";
 import colors from "tailwindcss/colors";
 import { Badge, BadgeText } from "@/components/ui/badge";
 
-type BookingStatus = "pending" | "confirmed" | "cancelled" | "completed";
+export enum BookingStatus {
+  PENDING = "pending",
+  CONFIRMED = "confirmed",
+  CANCELLED = "cancelled",
+  COMPLETED = "completed",
+}
+
 
 interface BookingListForAdminProps {
   id: number;

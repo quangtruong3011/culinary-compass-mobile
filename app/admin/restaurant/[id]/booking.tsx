@@ -16,12 +16,11 @@ import { Button, ButtonText } from "@/components/ui/button";
 import { useCallback, useState } from "react";
 import { Badge, BadgeText } from "@/components/ui/badge";
 import colors from "tailwindcss/colors";
-import { BookingStatus } from "@/features/bookings/screens/BookingCardForUser";
-import { useGetBookingsByAdminQuery, useGetBookingsByUserQuery, useUpdateBookingStatusMutation } from "@/features/bookings/api/booking.api";
+import {  useFindAllBookingForAdminQuery, useUpdateBookingStatusMutation } from "@/features/bookings/api/booking.api";
 import Booking from "../../booking";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
-import BookingCardForAdmin from "@/features/bookings/screens/BookingCardForAdmin";
+import BookingCardForAdmin, { BookingStatus } from "@/features/bookings/screens/BookingCardForAdmin";
 
 const PASE_SIZE=10;
 
@@ -42,7 +41,7 @@ export default function RestaurantBooking() {
   }, []);
 
   const { data, isLoading, isError, refetch, isFetching } =
-    useGetBookingsByAdminQuery({
+    useFindAllBookingForAdminQuery({
       page: page,
       limit: PASE_SIZE,
       filterText: "",
