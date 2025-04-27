@@ -1,6 +1,7 @@
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { useGetBookingsByUserQuery } from "@/features/bookings/api/booking.api";
-import BookingCardForUser from "@/features/bookings/screens/BookingCardForUser";
+import { Booking } from "@/features/bookings/interfaces/booking.interface";
+import BookingCardForUser, { BookingStatus } from "@/features/bookings/screens/BookingCardForUser";
 import BookingListHeader from "@/features/bookings/screens/BookingListHeader";
 import { useState } from "react";
 import { FlatList, Text } from "react-native";
@@ -23,6 +24,7 @@ export default function BookingScreen() {
       filterText: "",
       userId: user?.id as number,
     });
+    console.log("data", data);
 
   const bookings = [...(data?.data.results || [])].sort(
     (a, b) => new Date(b.createAt).getTime() - new Date(a.createAt).getTime()
@@ -41,8 +43,7 @@ export default function BookingScreen() {
             startTime={item.startTime}
             endTime={item.endTime}
             numberOfSeats={item.guests}
-            isConfirmed={item.isConfirmed}
-            isDeleted={item.isDeleted}
+            status={item.status as BookingStatus}
             onActionComplete={refetch}
           />
         )}

@@ -9,7 +9,6 @@ export interface GetBooking {
     startTime: Date;
     endTime: Date;
     guests: number;
-    isConfirmed: boolean;
-    isDeleted: boolean;
+    status: string;
   };
 }

@@ -8,6 +8,8 @@ import { GetAllBookingForUser } from "../interfaces/get-all-booking-for-user";
 import { BookingParam } from "../interfaces/booking-param.interface";
 import { GetBooking } from "../interfaces/get-booking.interface";
 import { GetAllBooking } from "../interfaces/get-all-booking.interface";
+import { GetAllBookingForAdmin } from "../interfaces/get-all-booking-for-admin";
+import { BookingParamByAdmin } from "../interfaces/booking-param-by-admin.interface";
 
 export const bookingApi = createApi({
   reducerPath: "bookingApi",
@@ -51,6 +53,22 @@ export const bookingApi = createApi({
       },
     }),
 
+    getBookingsByAdmin: builder.query<GetAllBookingForAdmin, BookingParamByAdmin>({
+      query: (options: BookingParamByAdmin) => ({
+        url: `/bookings/admin`,
+        method: "GET",
+        params: {
+          page: options.page,
+          limit: options.limit,
+          filterText: options.filterText,
+          restaurantId: options.restaurantId,
+        },
+      }),
+      transformResponse: (response: any) => {
+        return response;
+      },
+    }),
+
     findBookingForUser: builder.query<GetBooking, number>({
       query: (id) => ({
         url: `/bookings/${id}`,
@@ -73,22 +91,20 @@ export const bookingApi = createApi({
       }),
     }),
 
-    confirmBooking: builder.mutation<any, number>({
-      query: (id) => ({
-        url: `/bookings/confirm/${id}`,
+    updateBookingStatus: builder.mutation<any, { id: number; status: 'confirmed' | 'pending' | 'completed' | 'cancelled' }>({
+      query: ({ id, status }) => ({
+        url: `/bookings/status/${id}`,
         method: "PATCH",
+        body: { status },
       }),
-      transformResponse: (response: any) => {
-        return response;
-      },
     }),
 
-      deleteBooking: builder.mutation<any, number>({
-        query: (id) => ({
-          url: `/bookings/${id}`,
-          method: "DELETE",
-        }),
-      }),
+      // deleteBooking: builder.mutation<any, number>({
+      //   query: (id) => ({
+      //     url: `/bookings/${id}`,
+      //     method: "DELETE",
+      //   }),
+      // }),
   }),
 });
 
@@ -96,8 +112,9 @@ export const {
   useCreateBookingMutation,
   useGetAllBookingsQuery,
   useGetBookingsByUserQuery,
+  useGetBookingsByAdminQuery,
   useFindBookingForUserQuery,
   useUpdateBookingMutation,
-  useConfirmBookingMutation,
-  useDeleteBookingMutation,
+  useUpdateBookingStatusMutation,
+  // useDeleteBookingMutation,
 } = bookingApi;

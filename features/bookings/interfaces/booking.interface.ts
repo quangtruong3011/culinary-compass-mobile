@@ -11,6 +11,5 @@ export interface Booking {
   startTime: Date;
   endTime: Date;
   guests: number;
-  isConfirmed: boolean;
-  isDeleted: boolean;
+  status: string;
 }

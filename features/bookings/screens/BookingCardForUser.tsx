@@ -11,8 +11,15 @@ import moment from "moment";
 import { useDispatch, useSelector } from "react-redux";
 import { setCurrentBooking } from "../store/booking.slice";
 import { RootState } from "@/store/store";
-import { useDeleteBookingMutation, useFindBookingForUserQuery, useGetBookingsByUserQuery } from "../api/booking.api";
-import { useFindAllRestaurantsForUserQuery, useFindRestaurantForUserQuery } from "@/features/restaurants/api/restaurant.api";
+import { useFindBookingForUserQuery, useGetBookingsByUserQuery, useUpdateBookingStatusMutation } from "../api/booking.api";
+import { useFindAllRestaurantsForUserQuery, useFindOneRestaurantForUserQuery } from "@/features/restaurants/api/restaurant.api";
+
+export enum BookingStatus {
+  CONFIRMED = 'confirmed',
+  PENDING = 'pending',
+  COMPLETED = 'completed',
+  CANCELLED = 'cancelled',
+}
 
 interface BookingListForUserProps {
   id: number;
@@ -21,8 +28,7 @@ interface BookingListForUserProps {
   startTime: Date;
   endTime: Date;
   numberOfSeats: number;
-  isConfirmed: boolean;
-  isDeleted: boolean;
+  status: BookingStatus;
 }
 const BookingCardForUser = ({
   id,
@@ -31,23 +37,21 @@ const BookingCardForUser = ({
   startTime,
   endTime,
   numberOfSeats,
-  isConfirmed,
-  isDeleted,
+  status,
   onActionComplete,
 }: BookingListForUserProps & {onActionComplete: () => void}) => {
   const router = useRouter();
   const dispatch = useDispatch();
 
-  const { data: restaurant } = useFindRestaurantForUserQuery(restaurantId.toString());
+  const { data: restaurant } = useFindOneRestaurantForUserQuery(restaurantId.toString());
 
   const { data, isLoading, } = useFindBookingForUserQuery(id as number);
 
-  const [deleteBooking] = useDeleteBookingMutation();
+  const [deleteBooking] = useUpdateBookingStatusMutation();
 
   const handleEditPress = () => {
     dispatch(setCurrentBooking(data?.data));
     router.push(`../user/booking/${id}`);
-    console.log("isDeleted", isDeleted);
     onActionComplete();
   };
 
@@ -64,7 +68,7 @@ const BookingCardForUser = ({
           text: "Yes",
           onPress: async () => {
             try {
-              await deleteBooking(id as number).unwrap();
+              await deleteBooking({ id, status: BookingStatus.CANCELLED }).unwrap();
               console.log("Booking cancelled successfully");
               onActionComplete();
             } catch (error) {
@@ -94,14 +98,19 @@ const BookingCardForUser = ({
             Number of Seats: {numberOfSeats}
           </Text>
           <Text size="sm" className="text-gray-500">
-            Status: {isConfirmed ? "Confirmed" : "Pending"}
+            Status: {status}
           </Text>
         </VStack>
         <HStack space="xs">
-          {isDeleted ? (
+          {status === BookingStatus.CANCELLED ? (
             <Text size="sm" className="text-red-500 font-semibold">
               Booking Cancelled
             </Text>
+          ) : status === BookingStatus.COMPLETED ? (
+            <Button variant="outline" onPress={handleEditPress}>
+              <ButtonIcon as={EditIcon} size="sm" />
+              <ButtonText>Edit</ButtonText>
+            </Button>
           ) : (
             <>
               <Button variant="outline" onPress={handleEditPress}>
