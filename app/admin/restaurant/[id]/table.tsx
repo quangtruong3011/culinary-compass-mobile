@@ -13,6 +13,7 @@ import { Box } from "@/components/ui/box";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 import { PAGE_SIZE } from "@/constants/constants";
+import TableListEmpty from "@/features/tables/screens/TableListEmpty";
 
 export default function RestaurantTableScreen() {
   const [page, setPage] = useState(1);
@@ -130,13 +131,7 @@ export default function RestaurantTableScreen() {
         ListHeaderComponent={
           <TableListHeader onPressCreate={() => setIsOpenModal(true)} />
         }
-        ListEmptyComponent={
-          !isLoading ? (
-            <Box>
-              <Text>No tables found</Text>
-            </Box>
-          ) : null
-        }
+        ListEmptyComponent={<TableListEmpty />}
         ListFooterComponent={renderFooter}
         refreshControl={
           <RefreshControl

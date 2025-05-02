@@ -28,7 +28,7 @@ import {
   useToast,
 } from "@/components/ui/toast";
 import { useRouter } from "expo-router";
-import { Text } from "@/components/ui/text";
+import { BOOKING_STATUS } from "@/constants/constants";
 
 const CreateOrEditBooking = () => {
   const toast = useToast();
@@ -403,15 +403,17 @@ const CreateOrEditBooking = () => {
       />
 
       {is_authenticated ? (
-        <Button
-          className="mt-4"
-          variant="solid"
-          disabled={isLoading}
-          onPress={handleSubmit(onSubmit)}
-        >
-          <ButtonText>Save</ButtonText>
-          {isLoading && <ButtonSpinner animating={isLoading} />}
-        </Button>
+        booking?.status === BOOKING_STATUS.PENDING ? (
+          <Button
+            className="mt-4"
+            variant="solid"
+            disabled={isLoading}
+            onPress={handleSubmit(onSubmit)}
+          >
+            <ButtonText>Save</ButtonText>
+            {isLoading && <ButtonSpinner animating={isLoading} />}
+          </Button>
+        ) : null
       ) : (
         <Button
           className="mt-4"

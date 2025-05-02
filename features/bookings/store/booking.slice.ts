@@ -2,7 +2,7 @@ import { createSlice } from "@reduxjs/toolkit";
 import { bookingApi } from "../api/booking.api";
 import { BookingState } from "../interfaces/booking-state.interface";
 
-const initialState: Partial<BookingState> = {
+const initialState: BookingState = {
   bookings: null,
   currentBooking: null,
   isLoading: false,
@@ -31,7 +31,21 @@ const bookingSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder.addMatcher(
+      bookingApi.endpoints.findAllBookingForUser.matchFulfilled,
+      (state, { payload }) => {
+        state.bookings = payload.data.results;
+      }
+    );
+
+    builder.addMatcher(
       bookingApi.endpoints.findOneBookingForUser.matchFulfilled,
+      (state, { payload }) => {
+        state.currentBooking = payload.data;
+      }
+    );
+
+    builder.addMatcher(
+      bookingApi.endpoints.updateBookingStatus.matchFulfilled,
       (state, { payload }) => {
         state.currentBooking = payload.data;
       }

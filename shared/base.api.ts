@@ -4,7 +4,6 @@ import {
   clearCredentials,
   setCredentials,
 } from "@/features/auth/store/auth.slice";
-
 import { RootState } from "@/store/store";
 import { fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
@@ -22,10 +21,12 @@ const baseQuery = fetchBaseQuery({
 const baseQueryWithReauth = async (args: any, api: any, extraOptions: any) => {
   let result = await baseQuery(args, api, extraOptions);
 
+  // Nếu lỗi 401 xảy ra (token hết hạn)
   if (result.error?.status === 401) {
     const refreshToken = (api.getState() as RootState).auth.refresh_token;
 
     if (refreshToken) {
+      // Gửi yêu cầu refresh token
       const refreshResult = await baseQuery(
         {
           url: "/auth/refresh-token",
@@ -36,12 +37,14 @@ const baseQueryWithReauth = async (args: any, api: any, extraOptions: any) => {
         extraOptions
       );
 
+      // Nếu refresh token thành công, lấy access token mới và thực hiện lại request ban đầu
       if (refreshResult.data) {
         const responseData = refreshResult.data as RefreshTokenResponse;
 
         if (responseData.data) {
           const { access_token, refresh_token, user } = responseData.data;
 
+          // Lưu thông tin mới vào Redux store
           api.dispatch(
             setCredentials({
               user: user || (api.getState() as RootState).auth.user,
@@ -51,15 +54,17 @@ const baseQueryWithReauth = async (args: any, api: any, extraOptions: any) => {
             })
           );
 
+          // Gọi lại request ban đầu sau khi refresh token thành công
           return await baseQuery(args, api, extraOptions);
         }
       }
     }
 
+    // Nếu không refresh token được, clear credentials
     api.dispatch(clearCredentials());
   }
 
-  // console.log("baseQueryWithReauth", result.error);
+  console.log(result);
   return result;
 };
 

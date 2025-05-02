@@ -1,14 +1,17 @@
+import { Table } from "@/features/tables/interfaces/table.interface";
+import { BookingStatus } from "../types/booking-status.type";
+
 export interface Booking {
   id: number;
-  userId: number;
-  restaurantId: number;
+  userId?: number;
+  restaurantId?: number;
   name: string;
   phone: string;
   email?: string;
   date: Date;
-  createAt: Date;
   startTime: Date;
   endTime: Date;
   guests: number;
-  status: string;
+  status: BookingStatus;
+  tables?: Table[];
 }

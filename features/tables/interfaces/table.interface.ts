@@ -1,7 +1,9 @@
+import { TableStatus } from "../types/table-status.type";
+
 export interface Table {
   id: number;
   name: string;
   restaurantId: number;
   numberOfSeats: number;
-  isAvailable: boolean;
+  status: TableStatus;
 }

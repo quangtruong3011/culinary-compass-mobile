@@ -8,3 +8,16 @@ export const USER_ROLES = {
 export const MAX_IMAGES = 6;
 export const PAGE = 1;
 export const PAGE_SIZE = 10;
+
+export const BOOKING_STATUS = {
+  PENDING: "pending",
+  CONFIRMED: "confirmed",
+  CANCELLED: "cancelled",
+  COMPLETED: "completed",
+} as const;
+
+export const TABLE_STATUS = {
+  AVAILABLE: "available",
+  OCCUPIED: "occupied",
+  RESERVED: "reserved",
+} as const;

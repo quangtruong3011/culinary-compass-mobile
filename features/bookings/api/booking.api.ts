@@ -1,19 +1,17 @@
-import { BASE_URL } from "@/constants/constants";
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { RootState } from "@/store/store";
-import { Booking } from "../interfaces/booking.interface";
 import baseQueryWithReauth from "@/shared/base.api";
 import { CreateOrEditBookingDto } from "../interfaces/create-or-edit-booking.interface";
-import { GetAllBookingForUser } from "../interfaces/get-all-booking-for-user";
+import { GetAllBookingForUser } from "../interfaces/get-all-booking-for-user.interface";
 import { GetBookingDto } from "../interfaces/get-booking.interface";
-import { GetAllBooking } from "../interfaces/get-all-booking.interface";
-import { GetAllBookingForAdmin } from "../interfaces/get-all-booking-for-admin";
-import { BookingParamByAdmin } from "../interfaces/booking-param-by-admin.interface";
 import { PaginationOptions } from "@/shared/pagination.interface";
+import { GetAllBookingForAdminParams } from "../interfaces/get-all-booking-for-admin-params.interface";
+import { GetTableAvailableRequest } from "../interfaces/get-table-available.interface";
+import { GetAllBookingForAdmin } from "../interfaces/get-all-booking-for-admin.interface";
 
 export const bookingApi = createApi({
   reducerPath: "bookingApi",
   baseQuery: baseQueryWithReauth,
+  tagTypes: ["UserBooking", "AdminBooking", "BookingDetailsForAdmin"],
   endpoints: (builder) => ({
     createBooking: builder.mutation<any, CreateOrEditBookingDto>({
       query: (body) => ({
@@ -25,10 +23,10 @@ export const bookingApi = createApi({
 
     findAllBookingForAdmin: builder.query<
       GetAllBookingForAdmin,
-      BookingParamByAdmin
+      GetAllBookingForAdminParams
     >({
-      query: (options: BookingParamByAdmin) => ({
-        url: `/bookings/find-all-for-admin`,
+      query: (options: GetAllBookingForAdminParams) => ({
+        url: "/bookings/find-all-for-admin",
         method: "GET",
         params: {
           page: options.page,
@@ -37,9 +35,17 @@ export const bookingApi = createApi({
           restaurantId: options.restaurantId,
         },
       }),
-      transformResponse: (response: any) => {
-        return response;
-      },
+      providesTags: ["AdminBooking"],
+    }),
+
+    findOneBookingForAdmin: builder.query<GetBookingDto, number>({
+      query: (id) => ({
+        url: `/bookings/find-one-for-admin/${id}`,
+        method: "GET",
+      }),
+      providesTags: (result, error, id) => [
+        { type: "BookingDetailsForAdmin", id },
+      ],
     }),
 
     findAllBookingForUser: builder.query<
@@ -55,9 +61,7 @@ export const bookingApi = createApi({
           filterText: options.filterText,
         },
       }),
-      transformResponse: (response: any) => {
-        return response;
-      },
+      providesTags: ["UserBooking"],
     }),
 
     findOneBookingForUser: builder.query<GetBookingDto, number>({
@@ -65,10 +69,6 @@ export const bookingApi = createApi({
         url: `/bookings/find-one-for-user/${id}`,
         method: "GET",
       }),
-
-      transformResponse: (response: any) => {
-        return response;
-      },
     }),
 
     updateBooking: builder.mutation<
@@ -80,28 +80,41 @@ export const bookingApi = createApi({
         method: "PATCH",
         body,
       }),
+      invalidatesTags: [],
     }),
 
-    updateBookingStatus: builder.mutation<
-      any,
-      {
-        id: number;
-        status: "confirmed" | "pending" | "completed" | "cancelled";
-      }
-    >({
+    updateBookingStatus: builder.mutation<any, { id: number; status: string }>({
       query: ({ id, status }) => ({
-        url: `/bookings/status/${id}`,
+        url: `/bookings/${id}/status-booking`,
         method: "PATCH",
         body: { status },
       }),
+      invalidatesTags: ["AdminBooking", "BookingDetailsForAdmin"],
     }),
 
-    // deleteBooking: builder.mutation<any, number>({
-    //   query: (id) => ({
-    //     url: `/bookings/${id}`,
-    //     method: "DELETE",
-    //   }),
-    // }),
+    availableTableForBooking: builder.query<any, GetTableAvailableRequest>({
+      query: (params: GetTableAvailableRequest) => ({
+        url: `/bookings/available-table`,
+        method: "GET",
+        params: {
+          restaurantId: params.restaurantId,
+          date: params.date,
+          startTime: params.startTime,
+          endTime: params.endTime,
+        },
+      }),
+    }),
+
+    assignTableToBooking: builder.mutation<
+      any,
+      { id: number; tableIds: number[] }
+    >({
+      query: ({ id, tableIds }) => ({
+        url: `/bookings/${id}/assign-tables`,
+        method: "PATCH",
+        body: { tableIds },
+      }),
+    }),
   }),
 });
 
@@ -112,5 +125,6 @@ export const {
   useFindOneBookingForUserQuery,
   useUpdateBookingMutation,
   useUpdateBookingStatusMutation,
-  // useDeleteBookingMutation,
+  useAvailableTableForBookingQuery,
+  useAssignTableToBookingMutation,
 } = bookingApi;

@@ -70,7 +70,10 @@ const CreateOrEditUser = () => {
         name: user.name || "",
         email: user.email || "",
         phone: user.phone || "",
-        birthOfDate: moment(user.birthOfDate).toDate(),
+        birthOfDate:
+          user.birthOfDate !== null
+            ? moment(user.birthOfDate).toDate()
+            : moment().toDate(),
         gender: user.gender || "",
         imageUrl: user.imageUrl,
       });

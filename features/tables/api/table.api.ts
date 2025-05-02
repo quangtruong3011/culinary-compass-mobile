@@ -2,8 +2,8 @@ import baseQueryWithReauth from "@/shared/base.api";
 import { createApi } from "@reduxjs/toolkit/query/react";
 import { CreateOrEditTableDto } from "../interfaces/create-or-edit-table.interface";
 import { GetAllTableResponse } from "../interfaces/get-all-table.interface";
-import { GetTableResponse } from "../interfaces/get-table.interface";
 import { TablePaginationParams } from "../interfaces/table-pagination-params";
+import { GetTableDto } from "../interfaces/get-table.interface";
 
 export const tableApi = createApi({
   reducerPath: "tableApi",
@@ -34,7 +34,7 @@ export const tableApi = createApi({
       }),
     }),
 
-    findOneTable: builder.query<GetTableResponse, number>({
+    findOneTable: builder.query<GetTableDto, number>({
       query: (id) => ({
         url: `/tables/${id}`,
         method: "GET",

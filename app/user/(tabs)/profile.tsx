@@ -100,6 +100,14 @@ export default function UserProfile() {
           </Button>
         </VStack>
       )}
+
+      <RestaurantOpeningConfirmationModal
+        isOpen={isOpenModal}
+        onConfirm={handleConfirm}
+        onCancel={handleCloseModal}
+        title="Open Restaurant"
+        message="Are you sure you want to open a restaurant?"
+      />
     </VStack>
   );
 }

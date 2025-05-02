@@ -7,15 +7,14 @@ import { Menu, MenuItem, MenuItemLabel } from "@/components/ui/menu";
 import { Button, ButtonIcon } from "@/components/ui/button";
 import { EditIcon, Icon, MenuIcon, TrashIcon } from "@/components/ui/icon";
 import { Alert, StyleSheet } from "react-native";
-
-type TableStatus = "Available" | "Occupied";
+import { TableStatus } from "../types/table-status.type";
 
 export interface TableCardProps {
   id: number;
   name: string;
   restaurantId: number;
   numberOfSeats: number;
-  isAvailable: boolean;
+  status: TableStatus;
   onEdit?: (id: number) => void;
   onDelete?: (id: number) => void;
 }
@@ -25,12 +24,24 @@ const TableCard = ({
   name,
   restaurantId,
   numberOfSeats,
-  isAvailable,
+  status,
   onEdit,
   onDelete,
 }: TableCardProps) => {
-  const status: TableStatus = isAvailable ? "Available" : "Occupied";
-  const statusColor = isAvailable ? "success" : "error";
+  const mapStatusColor = (
+    statusColor: "available" | "occupied" | "reserved"
+  ): "success" | "warning" | "info" | "error" | "muted" | undefined => {
+    switch (statusColor) {
+      case "available":
+        return "success";
+      case "occupied":
+        return "error";
+      case "reserved":
+        return "warning";
+      default:
+        return "info";
+    }
+  };
 
   const handleEdit = () => onEdit?.(id);
   const handleDelete = () => {
@@ -67,11 +78,12 @@ const TableCard = ({
           </Text>
           <HStack space="md" className="items-center">
             <Text size="sm">Seats: {numberOfSeats}</Text>
-            <Badge size="md" variant="solid" action={statusColor}>
+            {/* <Badge size="md" variant="solid" action={mapStatusColor(status)}>
               <BadgeText>
                 {status.charAt(0).toUpperCase() + status.slice(1)}
+                {status.toUpperCase()}
               </BadgeText>
-            </Badge>
+            </Badge> */}
           </HStack>
         </VStack>
         <Menu

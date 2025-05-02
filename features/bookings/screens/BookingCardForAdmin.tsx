@@ -1,217 +1,216 @@
-import { Box } from "@/components/ui/box";
 import { Button, ButtonIcon, ButtonText } from "@/components/ui/button";
 import { HStack } from "@/components/ui/hstack";
 import { VStack } from "@/components/ui/vstack";
 import React from "react";
-import { Alert, Pressable, StyleSheet, View } from "react-native";
+import { StyleSheet, TouchableOpacity } from "react-native";
 import { Text } from "@/components/ui/text";
 import { useRouter } from "expo-router";
-import { EditIcon, TrashIcon } from "@/components/ui/icon";
+import {
+  CheckCircleIcon,
+  CheckIcon,
+  ClockIcon,
+  EyeIcon,
+  Icon,
+  MailIcon,
+  PhoneIcon,
+  TrashIcon,
+} from "@/components/ui/icon";
 import moment from "moment";
 import { useDispatch, useSelector } from "react-redux";
-import { setCurrentBooking } from "../store/booking.slice";
-import { RootState } from "@/store/store";
-import { useUpdateBookingStatusMutation } from "../api/booking.api";
-import colors from "tailwindcss/colors";
+import { bookingApi, useUpdateBookingStatusMutation } from "../api/booking.api";
+import { Card } from "@/components/ui/card";
+import { Heading } from "@/components/ui/heading";
 import { Badge, BadgeText } from "@/components/ui/badge";
+import colors from "tailwindcss/colors";
+import { BookingStatus } from "../types/booking-status.type";
+import { setCurrentBooking } from "../store/booking.slice";
+import { AppDispatch } from "@/store/store";
+import { BOOKING_STATUS } from "@/constants/constants";
+import {
+  Toast,
+  ToastDescription,
+  ToastTitle,
+  useToast,
+} from "@/components/ui/toast";
 
-export enum BookingStatus {
-  PENDING = "pending",
-  CONFIRMED = "confirmed",
-  CANCELLED = "cancelled",
-  COMPLETED = "completed",
-}
-
-
-interface BookingListForAdminProps {
+interface BookingCardForAdminProps {
   id: number;
-  restaurantId: number;
   name: string;
-  phoneNumber: string;
-  email: string;
+  phone: string;
+  email?: string;
   date: Date;
   startTime: Date;
   endTime: Date;
-  numberOfPeople: number;
+  numberOfSeats: number;
   status: BookingStatus;
-  specialRequests?: string;
 }
+
+const getStatusColor = (status: BookingStatus) => {
+  switch (status) {
+    case "confirmed":
+      return colors.green[500];
+    case "pending":
+      return colors.yellow[500];
+    case "cancelled":
+      return colors.red[500];
+    case "completed":
+      return colors.blue[500];
+    default:
+      return colors.gray[500];
+  }
+};
 
 const BookingCardForAdmin = ({
   id,
-  restaurantId,
   name,
-  phoneNumber,
+  phone,
   email,
   date,
   startTime,
   endTime,
-  numberOfPeople,
+  numberOfSeats,
   status,
-  specialRequests,
-}: BookingListForAdminProps) => {
+}: BookingCardForAdminProps) => {
+  const dispatch = useDispatch<AppDispatch>();
   const router = useRouter();
-  const dispatch = useDispatch();
+  const toast = useToast();
 
-  const [updateBookingStatus] = useUpdateBookingStatusMutation();
+  const [updateStatus, { isLoading }] = useUpdateBookingStatusMutation();
 
-  const handlePress = () => {
-    Alert.alert(
-      "Booking Details",
-      `Name: ${name}\nPhone: ${phoneNumber}\nEmail: ${email}\nDate: ${date}\nTime: ${moment(
-        startTime
-      ).format("HH:mm")} - ${moment(endTime).format(
-        "HH:mm"
-      )}\nNumber of People: ${numberOfPeople}\nStatus: ${status}${
-        specialRequests ? `\n\nSpecial Requests: ${specialRequests}` : ""
-      }`,
-      [{ text: "OK" }]
+  const handleConfirmPress = async () => {
+    const { data, isSuccess } = await dispatch(
+      bookingApi.endpoints.findOneBookingForAdmin.initiate(id)
     );
+    if (isSuccess && data) {
+      dispatch(setCurrentBooking(data.data));
+      router.push(`/admin/booking/${id}`);
+    }
   };
 
-  const handleConfirm = () => {
-    Alert.alert(
-      "Confirm Booking",
-      `Are you sure you want to confirm the booking for ${name}?`,
-      [
-        {
-          text: "Cancel",
-          style: "cancel",
-        },
-        {
-          text: "Confirm",
-          onPress: () =>
-            updateBookingStatus({ id: id, status: BookingStatus.CONFIRMED }),
-        },
-      ]
-    );
+  const handleCancelPress = async () => {
+    await updateStatus({ id, status: BOOKING_STATUS.CANCELLED }).then(() => {
+      toast.show({
+        placement: "top right",
+        render: ({ id }) => (
+          <Toast nativeID={`toast-${id}`} action="error" variant="outline">
+            <ToastTitle>Booking Cancelled</ToastTitle>
+            <ToastDescription>
+              The booking has been successfully cancelled.
+            </ToastDescription>
+          </Toast>
+        ),
+      });
+    });
   };
 
-  const handleCancel = () => {
-    Alert.alert(
-      "Cancel Booking",
-      `Are you sure you want to cancel the booking for ${name}?`,
-      [
-        {
-          text: "No",
-          style: "cancel",
-        },
-        {
-          text: "Yes",
-          onPress: () =>
-            updateBookingStatus({ id: id, status: BookingStatus.CANCELLED }),
-        },
-      ]
-    );
+  const handleCompletePress = async () => {
+    await updateStatus({ id, status: BOOKING_STATUS.COMPLETED });
+    toast.show({
+      placement: "top right",
+      render: ({ id }) => (
+        <Toast nativeID={`toast-${id}`} action="success" variant="outline">
+          <ToastTitle>Booking Completed</ToastTitle>
+          <ToastDescription>
+            The booking has been successfully marked as completed.
+          </ToastDescription>
+        </Toast>
+      ),
+    });
   };
 
-  const handleComplete = () => {
-    Alert.alert(
-      "Complete Booking",
-      `Are you sure you want to mark the booking for ${name} as completed?`,
-      [
-        {
-          text: "No",
-          style: "cancel",
-        },
-        {
-          text: "Yes",
-          onPress: () =>
-            updateBookingStatus({ id: id, status: BookingStatus.COMPLETED }),
-        },
-      ]
+  const handleViewDetailsPress = async () => {
+    const { data, isSuccess } = await dispatch(
+      bookingApi.endpoints.findOneBookingForAdmin.initiate(id)
     );
-  };
-
-  const getStatusColor = (status: BookingStatus) => {
-    switch (status) {
-      case "confirmed":
-        return colors.green[500];
-      case "pending":
-        return colors.yellow[500];
-      case "cancelled":
-        return colors.red[500];
-      case "completed":
-        return colors.blue[500];
-      default:
-        return colors.gray[500];
+    if (isSuccess && data) {
+      dispatch(setCurrentBooking(data.data));
+      router.push(`/admin/booking/${id}`);
     }
   };
 
   return (
-    <Pressable onPress={() => handlePress()}>
-      <View style={styles.card}>
-        <HStack style={styles.cardHeader}>
-          <Text style={styles.name}>{name}</Text>
+    <TouchableOpacity onPress={handleConfirmPress} disabled={isLoading}>
+      <Card style={styles.card}>
+        <HStack className="justify-between items-center p-4 border-b border-gray-200">
+          <Heading>{name}</Heading>
           <Badge style={{ backgroundColor: getStatusColor(status) }}>
             <BadgeText>{status.toUpperCase()}</BadgeText>
           </Badge>
         </HStack>
-
-        <VStack style={styles.cardBody}>
-          <HStack style={styles.infoRow}>
-            {/* <Phone size={16} color={colors.muted} /> */}
-            <Text style={styles.infoText}>{phoneNumber}</Text>
+        <VStack>
+          <HStack className="p-4 gap-2 items-center">
+            <Icon as={PhoneIcon} size="lg" />
+            <Text>{phone}</Text>
           </HStack>
-
-          <HStack style={styles.infoRow}>
-            {/* <Mail size={16} color={colors.muted} /> */}
-            <Text style={styles.infoText}>{email}</Text>
+          <HStack className="p-4 gap-2 items-center">
+            <Icon as={MailIcon} size="lg" />
+            <Text>{email}</Text>
           </HStack>
-
-          <HStack style={styles.infoRow}>
-            {/* <CalendarDays size={16} color={colors.muted} /> */}
-            <Text style={styles.infoText}>
-              {moment(date).format("MMM D, YYYY")}
-            </Text>
+          <HStack className="p-4 gap-2 items-center">
+            <Icon as={ClockIcon} size="lg" />
+            <Text>{moment(date).format("DD/MM/YYYY")}</Text>
           </HStack>
-
-          <HStack style={styles.infoRow}>
-            {/* <Clock size={16} color={colors.muted} /> */}
-            <Text style={styles.infoText}>
+          <HStack className="p-4 gap-2 items-center">
+            <Icon as={ClockIcon} size="lg" />
+            <Text>
               {moment(startTime).format("h:mm A")} -{" "}
               {moment(endTime).format("h:mm A")}
             </Text>
           </HStack>
-
-          <HStack style={styles.infoRow}>
-            {/* <Users size={16} color={colors.muted} /> */}
-            <Text style={styles.infoText}>{numberOfPeople} people</Text>
+          <HStack className="p-4 gap-2 items-center">
+            <Text>Number of seats: {numberOfSeats} seats</Text>
           </HStack>
         </VStack>
-
-        <HStack style={styles.cardFooter}>
+        <HStack className="p-4 justify-end gap-2 border-t border-gray-200">
           {status === "pending" ? (
             <>
-              <Button variant="outline" onPress={() => handleCancel()}>
+              <Button variant="outline" size="sm" onPress={handleCancelPress}>
+                <ButtonIcon as={TrashIcon} size="sm" />
                 <ButtonText>Decline</ButtonText>
               </Button>
-              <Button onPress={() => handleConfirm()}>
+              <Button variant="outline" size="sm" onPress={handleConfirmPress}>
+                <ButtonIcon as={CheckIcon} size="sm" />
                 <ButtonText>Confirm</ButtonText>
               </Button>
             </>
           ) : status === "confirmed" ? (
             <>
-              <Button variant="outline" onPress={() => handleComplete()}>
-                <ButtonText>Complete</ButtonText>
-              </Button>
-              <Button variant="outline" onPress={() => handleCancel()}>
+              <Button variant="outline" size="sm" onPress={handleCancelPress}>
+                <ButtonIcon as={TrashIcon} size="sm" />
                 <ButtonText>Cancel Booking</ButtonText>
               </Button>
+              <Button variant="outline" size="sm" onPress={handleCompletePress}>
+                <ButtonIcon as={CheckCircleIcon} size="sm" />
+                <ButtonText>Mark as Completed</ButtonText>
+              </Button>
             </>
+          ) : status === "completed" ? (
+            <Button
+              variant="outline"
+              size="sm"
+              onPress={handleViewDetailsPress}
+            >
+              <ButtonIcon as={EyeIcon} size="sm" />
+              <ButtonText>View Details</ButtonText>
+            </Button>
+          ) : status === "cancelled" ? (
+            <Button
+              variant="outline"
+              size="sm"
+              onPress={handleViewDetailsPress}
+            >
+              <ButtonIcon as={EyeIcon} size="sm" />
+              <ButtonText>View Details</ButtonText>
+            </Button>
           ) : null}
         </HStack>
-      </View>
-    </Pressable>
+      </Card>
+    </TouchableOpacity>
   );
 };
 export default BookingCardForAdmin;
 
 const styles = StyleSheet.create({
-  container: {
-    padding: 16,
-    paddingBottom: 32,
-  },
   card: {
     backgroundColor: "#fff",
     borderRadius: 12,
@@ -222,60 +221,5 @@ const styles = StyleSheet.create({
     shadowRadius: 6,
     elevation: 3,
     overflow: "hidden",
-  },
-  cardHeader: {
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: "#f0f0f0",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  cardBody: {
-    padding: 16,
-    gap: 12,
-  },
-  cardFooter: {
-    padding: 16,
-    borderTopWidth: 1,
-    borderTopColor: "#f0f0f0",
-    justifyContent: "flex-end",
-    gap: 12,
-  },
-  name: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "#1a1a1a",
-  },
-  infoRow: {
-    alignItems: "center",
-    gap: 8,
-  },
-  infoText: {
-    fontSize: 14,
-    color: "#555",
-  },
-  emptyContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 40,
-  },
-  emptyText: {
-    fontSize: 18,
-    fontWeight: "500",
-    color: "#333",
-    marginBottom: 8,
-  },
-  emptySubtext: {
-    fontSize: 14,
-    color: "#777",
-    textAlign: "center",
-  },
-  loadingOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(255,255,255,0.7)",
-    justifyContent: "center",
-    alignItems: "center",
-    zIndex: 1000,
   },
 });

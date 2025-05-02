@@ -1,7 +1,6 @@
 import { RestaurantImage } from "./restaurant-image.interface";
 
 export interface CreateOrEditRestaurantDto {
-  // id?: number;
   name: string;
   address: string;
   province: string;
@@ -18,5 +17,3 @@ export interface CreateOrEditRestaurantDto {
   images: RestaurantImage[];
   deletedImages?: RestaurantImage[];
 }
-
-

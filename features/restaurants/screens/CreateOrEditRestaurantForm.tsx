@@ -87,7 +87,6 @@ const CreateOrEditRestaurantForm = () => {
         website: restaurant.website || "",
         openingTime: moment(restaurant.openingTime).toDate(),
         closingTime: moment(restaurant.closingTime).toDate(),
-        deletedImages: []
       });
     }
   }, [restaurant, reset]);
@@ -117,13 +116,7 @@ const CreateOrEditRestaurantForm = () => {
   const pickImages = async () => {
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
     if (status !== "granted") {
-      return (
-        <Alert>
-          <AlertText>
-            Sorry, we need camera permissions to make this work!
-          </AlertText>
-        </Alert>
-      );
+      return;
     }
 
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -158,7 +151,6 @@ const CreateOrEditRestaurantForm = () => {
   };
 
   const onSubmit = async (data: CreateOrEditRestaurantDto) => {
-    console.log("Form data:", data);
     try {
       // Convert local images to base64
       const updatedImages = await Promise.all(
@@ -179,11 +171,11 @@ const CreateOrEditRestaurantForm = () => {
       data.images = updatedImages;
 
       // Decide whether to create or update
-      const action = restaurant
-        ? update({ id: restaurant.id as number, body: data }).unwrap()
-        : create(data).unwrap();
-
-      await action;
+      if (restaurant) {
+        await update({ id: restaurant?.id as number, body: data }).unwrap();
+      } else {
+        await create(data).unwrap();
+      }
 
       toast.show({
         placement: "top right",
@@ -200,9 +192,8 @@ const CreateOrEditRestaurantForm = () => {
           </Toast>
         ),
       });
-
       // Optionally reset form or redirect here
-      reset();
+      // reset();
       // navigation.goBack(); // nếu muốn tự động quay lại màn trước
     } catch (error) {
       toast.show({
@@ -733,7 +724,9 @@ const CreateOrEditRestaurantForm = () => {
           </FormControl>
         )}
       />
-
+      {/* {Object.values(errors).map((error, index) => (
+        <Text key={index}>{error?.message}</Text>
+      ))} */}
       <Button
         onPress={handleSubmit(onSubmit)}
         isDisabled={isLoading}

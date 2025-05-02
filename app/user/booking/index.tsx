@@ -1,9 +1,8 @@
 import { PAGE, PAGE_SIZE } from "@/constants/constants";
-import { useAuth } from "@/features/auth/hooks/useAuth";
 import { useFindAllBookingForUserQuery } from "@/features/bookings/api/booking.api";
-import { BookingCardForUser } from "@/features/bookings/screens/BookingCardForUser";
+import BookingCardForUser from "@/features/bookings/screens/BookingCardForUser";
 import BookingListHeader from "@/features/bookings/screens/BookingListHeader";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { FlatList } from "react-native";
 import { RefreshControl } from "react-native";
 
@@ -48,6 +47,7 @@ export default function BookingScreen() {
             startTime={item.startTime}
             endTime={item.endTime}
             numberOfSeats={item.guests}
+            status={item.status}
           />
         )}
         ListHeaderComponent={BookingListHeader}

@@ -1,6 +1,3 @@
-import { relativeTimeRounding } from "moment";
-import { Text } from "react-native";
-import BookingListForUser from "./BookingCardForUser";
 import { Stack } from "expo-router";
 
 const BookingListHeader = () => {

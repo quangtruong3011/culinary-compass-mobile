@@ -1,19 +1,7 @@
 import { Stack } from "expo-router";
-import {
-  FlatList,
-  View,
-  Text,
-  StyleSheet,
-  RefreshControl,
-  Pressable,
-  Alert,
-  ActivityIndicator,
-} from "react-native";
-import moment from "moment";
-import { HStack } from "@/components/ui/hstack";
-import { VStack } from "@/components/ui/vstack";
-import { Button, ButtonText } from "@/components/ui/button";
+import { FlatList, RefreshControl } from "react-native";
 import { useCallback, useState } from "react";
+<<<<<<< Updated upstream
 import { Badge, BadgeText } from "@/components/ui/badge";
 import colors from "tailwindcss/colors";
 import {  useFindAllBookingForAdminQuery, useUpdateBookingStatusMutation } from "@/features/bookings/api/booking.api";
@@ -49,6 +37,47 @@ export default function RestaurantBooking() {
     }, { refetchOnMountOrArgChange: true });
 
   const bookings = data?.data.results || [];
+=======
+import BookingListEmptyForAdmin from "@/features/bookings/screens/BookingListEmptyForAdmin";
+import BookingCardForAdmin from "@/features/bookings/screens/BookingCardForAdmin";
+import { useFindAllBookingForAdminQuery } from "@/features/bookings/api/booking.api";
+import { PAGE, PAGE_SIZE } from "@/constants/constants";
+import { useSelector } from "react-redux";
+import { RootState } from "@/store/store";
+
+export default function RestaurantBooking() {
+  const restaurantId = useSelector(
+    (state: RootState) => state?.restaurant?.currentRestaurant?.id
+  );
+  const [page, setPage] = useState(PAGE);
+  const [isManualRefreshing, setIsManualRefreshing] = useState(false);
+
+  const { data, isLoading, isError, refetch } = useFindAllBookingForAdminQuery({
+    page: page,
+    limit: PAGE_SIZE,
+    filterText: "",
+    restaurantId: restaurantId,
+  });
+
+  const totalPages = data?.data?.totalPages || 0;
+  const hasMoreData = page < totalPages;
+
+  const handleRefresh = useCallback(async () => {
+    setIsManualRefreshing(true);
+    setPage(1);
+    try {
+      await refetch();
+    } finally {
+      setIsManualRefreshing(false);
+    }
+  }, [refetch]);
+
+  const handleLoadMore = useCallback(() => {
+    if (!isLoading && hasMoreData) {
+      setPage((prevPage) => prevPage + 1);
+    }
+  }, [isLoading, hasMoreData]);
+>>>>>>> Stashed changes
 
   return (
     <>
@@ -60,17 +89,24 @@ export default function RestaurantBooking() {
         }}
       />
 
+<<<<<<< Updated upstream
       {isLoading && (
         <View style={styles.loadingOverlay}>
           <ActivityIndicator size="large" />
         </View>
       )}
 
+=======
+>>>>>>> Stashed changes
       <FlatList
-        data={bookings}
+        data={data?.data.results}
         keyExtractor={(item) => item.id.toString()}
-        contentContainerStyle={styles.container}
+        contentContainerStyle={{
+          paddingBottom: 32,
+          paddingTop: 16,
+        }}
         showsVerticalScrollIndicator={false}
+<<<<<<< Updated upstream
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
             <Text style={styles.emptyText}>No bookings found</Text>
@@ -93,13 +129,36 @@ export default function RestaurantBooking() {
             status={item.status as BookingStatus}
           />
         )}
+=======
+        ListEmptyComponent={<BookingListEmptyForAdmin />}
+        renderItem={({ item }) => (
+          <BookingCardForAdmin
+            id={item.id}
+            name={item.name}
+            phone={item.phone}
+            email={item.email}
+            date={item.date}
+            startTime={item.startTime}
+            endTime={item.endTime}
+            numberOfSeats={item.guests}
+            status={item.status}
+          />
+        )}
+        refreshing={isLoading}
+>>>>>>> Stashed changes
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          <RefreshControl
+            refreshing={isManualRefreshing}
+            onRefresh={handleRefresh}
+          />
         }
+        onEndReached={handleLoadMore}
+        onEndReachedThreshold={0.5}
       />
     </>
   );
 }
+<<<<<<< Updated upstream
 
 const styles = StyleSheet.create({
   container: {
@@ -133,3 +192,5 @@ const styles = StyleSheet.create({
 });
 
 
+=======
+>>>>>>> Stashed changes

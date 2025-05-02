@@ -4,18 +4,27 @@ import { TrashIcon } from "@/components/ui/icon";
 import { Text } from "@/components/ui/text";
 import { VStack } from "@/components/ui/vstack";
 import { useRemoveRestaurantMutation } from "@/features/restaurants/api/restaurant.api";
-import { RootState } from "@/store/store";
+import { clearCurrentRestaurant } from "@/features/restaurants/store/restaurant.slice";
+import { AppDispatch, RootState } from "@/store/store";
 import { Ionicons } from "@expo/vector-icons";
 import { Link, Stack, useRouter } from "expo-router";
+import { useEffect } from "react";
 import { Alert, ScrollView, TouchableOpacity } from "react-native";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 
 export default function RestaurantDetailForAdminScreen() {
+  const dispatch = useDispatch<AppDispatch>();
   const restaurant = useSelector(
     (state: RootState) => state.restaurant?.currentRestaurant
   );
   const id = restaurant?.id;
   const router = useRouter();
+
+  useEffect(() => {
+    return () => {
+      dispatch(clearCurrentRestaurant());
+    };
+  }, [dispatch]);
 
   const [remove, { isLoading: isRemoving }] = useRemoveRestaurantMutation();
 
@@ -35,9 +44,6 @@ export default function RestaurantDetailForAdminScreen() {
             router.push({
               pathname: "/admin/(tabs)/restaurant",
             });
-            // router.replace({
-            //   pathname: "/admin/(tabs)/restaurant",
-            // });
           },
         },
       ],
@@ -65,6 +71,7 @@ export default function RestaurantDetailForAdminScreen() {
       href: `/admin/restaurant/${id}/booking` as const,
     },
   ];
+
   return (
     <ScrollView>
       <Stack.Screen
