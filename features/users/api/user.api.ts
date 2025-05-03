@@ -1,8 +1,8 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
-import baseQueryWithReauth from "@/shared/base.api";
 import { GetUserDto } from "../interfaces/get-user.interface";
 import { CreateOrEditUserDto } from "../interfaces/create-or-edit-user.interface";
 import { SingleResponse } from "@/shared/api-response";
+import baseQueryWithReauth from "@/shared/base.api";
 
 export const userApi = createApi({
   reducerPath: "userApi",

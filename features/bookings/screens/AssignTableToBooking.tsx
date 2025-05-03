@@ -29,6 +29,7 @@ import {
   ToastTitle,
   useToast,
 } from "@/components/ui/toast";
+import { useRouter } from "expo-router";
 
 interface AssignTableToBookingProps {
   isOpen?: boolean;
@@ -39,6 +40,7 @@ const AssignTableToBooking = ({
   isOpen,
   onClose,
 }: AssignTableToBookingProps) => {
+  const router = useRouter();
   const toast = useToast();
   const booking = useSelector(
     (state: RootState) => state?.booking?.currentBooking
@@ -130,6 +132,7 @@ const AssignTableToBooking = ({
       });
 
       onClose?.();
+      router.back();
     } catch (error) {
       console.error("Failed to confirm booking:", error);
       toast.show({

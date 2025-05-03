@@ -69,6 +69,7 @@ export const bookingApi = createApi({
         url: `/bookings/find-one-for-user/${id}`,
         method: "GET",
       }),
+      providesTags: (result, error, id) => [{ type: "UserBooking", id }],
     }),
 
     updateBooking: builder.mutation<
@@ -80,7 +81,9 @@ export const bookingApi = createApi({
         method: "PATCH",
         body,
       }),
-      invalidatesTags: [],
+      invalidatesTags: (result, error, { id }) => [
+        { type: "UserBooking", id },
+      ],
     }),
 
     updateBookingStatus: builder.mutation<any, { id: number; status: string }>({
@@ -115,6 +118,19 @@ export const bookingApi = createApi({
         body: { tableIds },
       }),
     }),
+
+    getDashboardData: builder.query({
+      query: () => "/bookings/dashboard",
+      transformResponse: (response: any) => {
+        // Xử lý response có nested data
+        const data = response.data || response;
+        return {
+          todayBookings: data.todayBookings || [],
+          top5MonthlyBookings: data.top5MonthlyBookings || [],
+          top5QuarterlyBookings: data.top5QuarterlyBookings || []
+        };
+      }
+    }),
   }),
 });
 
@@ -127,4 +143,5 @@ export const {
   useUpdateBookingStatusMutation,
   useAvailableTableForBookingQuery,
   useAssignTableToBookingMutation,
+  useGetDashboardDataQuery,
 } = bookingApi;

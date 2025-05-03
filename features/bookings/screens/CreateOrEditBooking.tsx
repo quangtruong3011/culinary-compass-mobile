@@ -13,11 +13,12 @@ import { Input, InputField } from "@/components/ui/input";
 import { useEffect, useState } from "react";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { Button, ButtonSpinner, ButtonText } from "@/components/ui/button";
-import { useSelector } from "react-redux";
-import { RootState } from "@/store/store";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "@/store/store";
 import { CreateOrEditBookingDto } from "../interfaces/create-or-edit-booking.interface";
 import moment from "moment";
 import {
+  bookingApi,
   useCreateBookingMutation,
   useUpdateBookingMutation,
 } from "../api/booking.api";
@@ -29,8 +30,11 @@ import {
 } from "@/components/ui/toast";
 import { useRouter } from "expo-router";
 import { BOOKING_STATUS } from "@/constants/constants";
+import { setCurrentBooking } from "../store/booking.slice";
+
 
 const CreateOrEditBooking = () => {
+  const dispatch = useDispatch<AppDispatch>();
   const toast = useToast();
   const router = useRouter();
   const { is_authenticated } = useSelector((state: RootState) => state?.auth);
@@ -104,6 +108,13 @@ const CreateOrEditBooking = () => {
           id: booking.id,
           body: data,
         }).unwrap();
+        const { data: updated } = await dispatch(
+          bookingApi.endpoints.findOneBookingForUser.initiate(booking.id)
+        );
+      
+        if (updated) {
+          dispatch(setCurrentBooking(updated.data));
+        }
         toast.show({
           placement: "top right",
           duration: 3000,
@@ -136,6 +147,7 @@ const CreateOrEditBooking = () => {
         });
         reset();
       }
+
     } catch (error) {}
   };
 
@@ -403,7 +415,7 @@ const CreateOrEditBooking = () => {
       />
 
       {is_authenticated ? (
-        booking?.status === BOOKING_STATUS.PENDING ? (
+        !booking || booking?.status === BOOKING_STATUS.PENDING ? (
           <Button
             className="mt-4"
             variant="solid"

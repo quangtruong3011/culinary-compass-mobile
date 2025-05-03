@@ -44,6 +44,7 @@ const BookingCardForUser = ({
     const { data } = await dispatch(
       bookingApi.endpoints.findOneBookingForUser.initiate(id)
     );
+    console.log("data", data);
 
     if (data) {
       dispatch(setCurrentBooking(data.data));
@@ -151,7 +152,7 @@ const BookingCardForUser = ({
               </BadgeText>
             </Badge>
           </VStack>
-          {status === "pending" && (
+          {(status === "pending" || status === "confirmed") && (
             <Button onPress={handleCancelPress}>
               <ButtonIcon as={TrashIcon} size="md" />
               <ButtonText>Cancel</ButtonText>

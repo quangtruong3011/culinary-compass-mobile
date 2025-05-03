@@ -23,6 +23,15 @@ export default function RestaurantAdminScreen() {
   const totalPages = data?.data?.totalPages || 0;
   const hasMoreData = page < totalPages;
 
+    // Xử lý debounce cho filterText
+    useEffect(() => {
+      const timer = setTimeout(() => {
+        setDebouncedFilterText(filterText);
+        setPage(1); // Reset về trang đầu khi tìm kiếm
+      }, 300); // 300ms debounce
+      return () => clearTimeout(timer);
+    }, [filterText]);
+
   const handleFilterTextChange = (text: string) => {
     setFilterText(text);
   };
@@ -39,7 +48,7 @@ export default function RestaurantAdminScreen() {
     if (!isFetching && hasMoreData) {
       setPage((prevPage) => prevPage + 1);
     }
-  }, [isLoading, data, page, isFetching]);
+  }, [isLoading, hasMoreData]);
 
   return (
     <FlatList

@@ -104,6 +104,9 @@ const CreateOrEditRestaurantForm = () => {
   const [wards, setWards] = useState<Wards[]>([]);
 
   const [showTimePicker, setShowTimePicker] = useState(false);
+  const [isProvinceSelectOpen, setProvinceSelectOpen] = useState(false);
+  const [isDistrictSelectOpen, setDistrictSelectOpen] = useState(false);
+  const [isWardSelectOpen, setWardSelectOpen] = useState(false);
   const [currentTimeFiled, setCurrentTimeField] = useState<
     "openingTime" | "closingTime"
   >("openingTime");
@@ -352,6 +355,7 @@ const CreateOrEditRestaurantForm = () => {
                           setSelectedDistrict(null);
                           setWards([]);
                           onBlur();
+                          setProvinceSelectOpen(false);
                         }}
                       />
                     ))}
@@ -410,6 +414,7 @@ const CreateOrEditRestaurantForm = () => {
                           setSelectedDistrict(district);
                           setWards(district.wards || []);
                           onBlur();
+                          setDistrictSelectOpen(false);
                         }}
                       />
                     ))}
@@ -463,6 +468,7 @@ const CreateOrEditRestaurantForm = () => {
                         onPress={() => {
                           onChange(ward.name);
                           onBlur();
+                          setWardSelectOpen(false);
                         }}
                       />
                     ))}
