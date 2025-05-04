@@ -7,4 +7,6 @@ export interface CreateOrEditBookingDto {
   startTime: Date;
   endTime: Date;
   guests: number;
+  note?: string;
+  isCommented: boolean;
 }

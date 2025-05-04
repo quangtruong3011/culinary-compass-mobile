@@ -7,6 +7,7 @@ import { PaginationOptions } from "@/shared/pagination.interface";
 import { GetAllBookingForAdminParams } from "../interfaces/get-all-booking-for-admin-params.interface";
 import { GetTableAvailableRequest } from "../interfaces/get-table-available.interface";
 import { GetAllBookingForAdmin } from "../interfaces/get-all-booking-for-admin.interface";
+import { commentApi } from "@/features/comments/api/comment.api";
 
 export const bookingApi = createApi({
   reducerPath: "bookingApi",
@@ -131,6 +132,14 @@ export const bookingApi = createApi({
         };
       }
     }),
+
+    commentRestaurant: builder.mutation<any, number>({
+      query: (id) => ({
+        url: `/bookings/${id}/comment`,
+        method: "PATCH",
+      }),
+    }),
+
   }),
 });
 
@@ -144,4 +153,5 @@ export const {
   useAvailableTableForBookingQuery,
   useAssignTableToBookingMutation,
   useGetDashboardDataQuery,
+  useCommentRestaurantMutation,
 } = bookingApi;

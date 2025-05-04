@@ -22,4 +22,5 @@ export const bookingSchema = z.object({
     invalid_type_error: "Invalid end time",
   }),
   guests: z.number().min(1, "Please select the number of guests"),
+  note: z.string().optional(),
 });

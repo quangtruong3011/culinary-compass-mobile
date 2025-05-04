@@ -43,11 +43,13 @@ export default function BookingScreen() {
         renderItem={({ item }) => (
           <BookingCardForUser
             id={item.id}
+            restaurantId={item.restaurantId}
             date={item.date}
             startTime={item.startTime}
             endTime={item.endTime}
             numberOfSeats={item.guests}
             status={item.status}
+            isCommented={item.isCommented}
           />
         )}
         ListHeaderComponent={BookingListHeader}

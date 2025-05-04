@@ -10,7 +10,7 @@ import moment from "moment";
 import { useDispatch } from "react-redux";
 import { setCurrentBooking } from "../store/booking.slice";
 import { AppDispatch } from "@/store/store";
-import { bookingApi, useUpdateBookingStatusMutation } from "../api/booking.api";
+import { bookingApi, useCommentRestaurantMutation, useUpdateBookingStatusMutation } from "../api/booking.api";
 import { Card } from "@/components/ui/card";
 import { BOOKING_STATUS } from "@/constants/constants";
 import { Toast, ToastTitle, useToast } from "@/components/ui/toast";
@@ -19,27 +19,30 @@ import { BookingStatus } from "../types/booking-status.type";
 
 interface BookingCardForUserProps {
   id: number;
+  restaurantId: number;
   date: Date;
   startTime: Date;
   endTime: Date;
   numberOfSeats: number;
   status: BookingStatus;
+  isCommented: boolean;
 }
 
 const BookingCardForUser = ({
   id,
+  restaurantId,
   date,
   startTime,
   endTime,
   numberOfSeats,
   status,
+  isCommented,
 }: BookingCardForUserProps) => {
   const dispatch = useDispatch<AppDispatch>();
   const router = useRouter();
   const toast = useToast();
 
   const [updateStatusBooking, { isLoading }] = useUpdateBookingStatusMutation();
-
   const handleEditPress = async () => {
     const { data } = await dispatch(
       bookingApi.endpoints.findOneBookingForUser.initiate(id)
@@ -48,7 +51,7 @@ const BookingCardForUser = ({
 
     if (data) {
       dispatch(setCurrentBooking(data.data));
-      router.push(`/user/booking/${id}`);
+      router.push(`/user/booking/${id}/createOrEdit`);
     }
   };
 
@@ -117,6 +120,24 @@ const BookingCardForUser = ({
     }
   };
 
+  const handleCommentPress = async () => {
+    try {
+      const { data } = await dispatch(
+        bookingApi.endpoints.findOneBookingForUser.initiate(id)
+      );
+      console.log("data", data);
+
+      if (data) {
+        dispatch(setCurrentBooking(data.data));
+        router.push(`/user/booking/${id}/comment`);
+      }
+    }
+    catch (error) {
+      console.error("Error fetching booking data:", error);
+    }
+  };
+
+
   return (
     <TouchableOpacity onPress={handleEditPress}>
       <Card style={styles.card}>
@@ -156,6 +177,11 @@ const BookingCardForUser = ({
             <Button onPress={handleCancelPress}>
               <ButtonIcon as={TrashIcon} size="md" />
               <ButtonText>Cancel</ButtonText>
+            </Button>
+          )}
+          {status === "completed" && isCommented === false && (
+            <Button onPress={handleCommentPress}>
+              <ButtonText>Comment</ButtonText>
             </Button>
           )}
         </HStack>

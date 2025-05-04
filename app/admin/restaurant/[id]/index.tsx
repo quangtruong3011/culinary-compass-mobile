@@ -70,6 +70,12 @@ export default function RestaurantDetailForAdminScreen() {
       icon: "calendar",
       href: `/admin/restaurant/${id}/booking` as const,
     },
+    {
+      id: "comments",
+      label: "Comments",
+      icon: "chatbubble-ellipses",
+      href: `/admin/restaurant/${id}/comment` as const,
+    },
   ];
 
   return (

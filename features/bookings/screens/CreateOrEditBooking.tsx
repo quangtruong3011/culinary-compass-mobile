@@ -70,6 +70,7 @@ const CreateOrEditBooking = () => {
         startTime: new Date(booking.startTime),
         endTime: new Date(booking.endTime),
         guests: Number(booking.guests),
+        note: booking.note,
       });
     } else {
       reset({
@@ -81,6 +82,7 @@ const CreateOrEditBooking = () => {
         startTime: new Date(),
         endTime: new Date(),
         guests: 0,
+        note: "",
       });
     }
   }, [booking, reset]);
@@ -408,6 +410,31 @@ const CreateOrEditBooking = () => {
                 <FormControlErrorText>
                   {errors.guests.message}
                 </FormControlErrorText>
+              </FormControlError>
+            )}
+          </FormControl>
+        )}
+      />
+
+      <Controller
+        name="note"
+        control={control}
+        render={({ field: { onChange, onBlur, value } }) => (
+          <FormControl isInvalid={!!errors.note} isRequired={false} isDisabled={isLoading}>
+            <FormControlLabel>
+              <FormControlLabelText>Note</FormControlLabelText>
+            </FormControlLabel>
+            <Input className="my-1">
+              <InputField
+                type="text"
+                onChangeText={onChange}
+                onBlur={onBlur}
+                value={value}
+              />
+            </Input>
+            {errors.note && (
+              <FormControlError>
+                <FormControlErrorText>{errors.note.message}</FormControlErrorText>
               </FormControlError>
             )}
           </FormControl>
