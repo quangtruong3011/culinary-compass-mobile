@@ -15,12 +15,12 @@ export default function AdminHome() {
     data: dashboardData,
     isLoading,
     error,
-  } = useGetDashboardDataQuery( ownerId ? {ownerId } : skipToken);
+  } = useGetDashboardDataQuery(ownerId ? { ownerId } : skipToken);
 
   interface Booking {
     restaurantId: number;
     restaurantName?: string;
-    totalBookings: number;
+    todayBookings: number;
     monthBookings: number;
     quarterBookings: number;
   }
@@ -79,7 +79,7 @@ export default function AdminHome() {
           todayBookings.map((b) => (
             <Text key={b.restaurantId} style={styles.text}>
               {b.restaurantName || `Nhà hàng ${b.restaurantId}`}:{" "}
-              {b.totalBookings} lượt
+              {b.todayBookings} lượt
             </Text>
           ))
         ) : (
