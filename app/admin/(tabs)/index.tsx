@@ -4,9 +4,13 @@ import { ScrollView, StyleSheet, View, Dimensions } from "react-native";
 import { Text } from "@/components/ui/text";
 import { BarChart } from "react-native-chart-kit";
 import { useGetDashboardDataQuery } from "@/features/bookings/api/booking.api";
+import { useSelector } from "react-redux";
+import { RootState } from "@/store/store";
 
 export default function AdminHome() {
-  const { refetch ,data: dashboardData, isLoading, error } = useGetDashboardDataQuery({});
+  const ownerId = useSelector(
+    (state: RootState) => state.auth.user?.id);
+  const { refetch ,data: dashboardData, isLoading, error } = useGetDashboardDataQuery({ownerId: ownerId});
 
   interface Booking {
     restaurantId: number;
@@ -20,8 +24,10 @@ export default function AdminHome() {
   //loading state
   useFocusEffect(
     useCallback(() => {
+      if (ownerId) {
       refetch();
-    }, [refetch])
+      }
+    }, [refetch, ownerId])
   );
 
   useEffect(() => {
@@ -31,6 +37,8 @@ export default function AdminHome() {
       setTop5Quarterly(dashboardData.top5QuarterlyBookings || []);
     }
   }, [dashboardData]);
+
+  console.log('Dashboard Data:', dashboardData);
 
   if (isLoading) {
     return <Text style={styles.loading}>Đang tải dữ liệu...</Text>;
@@ -78,7 +86,7 @@ export default function AdminHome() {
           <BarChart
             data={{
               labels: top5Monthly.map((b) => b.restaurantName || `R${b.restaurantId}`),
-              datasets: [{ data: top5Monthly.map((b) => b.totalBookings) }],
+              datasets: [{ data: top5Monthly.map((b) => b.monthBookings) }],
             }}
             width={screenWidth}
             height={250}
@@ -101,7 +109,7 @@ export default function AdminHome() {
           <BarChart
             data={{
               labels: top5Quarterly.map((b) => b.restaurantName || `R${b.restaurantId}`),
-              datasets: [{ data: top5Quarterly.map((b) => b.totalBookings) }],
+              datasets: [{ data: top5Quarterly.map((b) => b.quarterBookings) }],
             }}
             width={screenWidth}
             height={250}

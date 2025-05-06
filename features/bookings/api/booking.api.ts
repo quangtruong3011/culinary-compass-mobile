@@ -120,17 +120,20 @@ export const bookingApi = createApi({
       }),
     }),
 
-    getDashboardData: builder.query({
-      query: () => "/bookings/dashboard",
+    getDashboardData: builder.query<any, { ownerId: number }>({
+      query: ({ ownerId }) => ({
+        url: `/bookings/${ownerId}/dashboard`,
+        method: "GET",
+      }),
       transformResponse: (response: any) => {
         // Xử lý response có nested data
         const data = response.data || response;
         return {
           todayBookings: data.todayBookings || [],
           top5MonthlyBookings: data.top5MonthlyBookings || [],
-          top5QuarterlyBookings: data.top5QuarterlyBookings || []
+          top5QuarterlyBookings: data.top5QuarterlyBookings || [],
         };
-      }
+      },
     }),
 
     commentRestaurant: builder.mutation<any, number>({
