@@ -6,6 +6,7 @@ import { BarChart } from "react-native-chart-kit";
 import { useGetDashboardDataQuery } from "@/features/bookings/api/booking.api";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
+import { skipToken } from "@reduxjs/toolkit/query";
 
 export default function AdminHome() {
   const ownerId = useSelector((state: RootState) => state.auth.user?.id);
@@ -14,14 +15,14 @@ export default function AdminHome() {
     data: dashboardData,
     isLoading,
     error,
-  } = useGetDashboardDataQuery(
-    { ownerId: ownerId as number },
-  );
+  } = useGetDashboardDataQuery(ownerId ? { ownerId } : skipToken);
 
   interface Booking {
     restaurantId: number;
     restaurantName?: string;
-    totalBookings: number;
+    todayBookings: number;
+    monthBookings: number;
+    quarterBookings: number;
   }
 
   const [todayBookings, setTodayBookings] = useState<Booking[]>([]);
@@ -78,7 +79,7 @@ export default function AdminHome() {
           todayBookings.map((b) => (
             <Text key={b.restaurantId} style={styles.text}>
               {b.restaurantName || `Nhà hàng ${b.restaurantId}`}:{" "}
-              {b.totalBookings} lượt
+              {b.todayBookings} lượt
             </Text>
           ))
         ) : (
