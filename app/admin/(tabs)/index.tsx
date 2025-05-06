@@ -6,16 +6,23 @@ import { BarChart } from "react-native-chart-kit";
 import { useGetDashboardDataQuery } from "@/features/bookings/api/booking.api";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
+import { skipToken } from "@reduxjs/toolkit/query";
 
 export default function AdminHome() {
-  const ownerId = useSelector(
-    (state: RootState) => state.auth.user?.id);
-  const { refetch ,data: dashboardData, isLoading, error } = useGetDashboardDataQuery({ownerId: ownerId});
+  const ownerId = useSelector((state: RootState) => state.auth.user?.id);
+  const {
+    refetch,
+    data: dashboardData,
+    isLoading,
+    error,
+  } = useGetDashboardDataQuery( ownerId ? {ownerId } : skipToken);
 
   interface Booking {
     restaurantId: number;
     restaurantName?: string;
     totalBookings: number;
+    monthBookings: number;
+    quarterBookings: number;
   }
 
   const [todayBookings, setTodayBookings] = useState<Booking[]>([]);
@@ -25,7 +32,7 @@ export default function AdminHome() {
   useFocusEffect(
     useCallback(() => {
       if (ownerId) {
-      refetch();
+        refetch();
       }
     }, [refetch, ownerId])
   );
@@ -38,7 +45,7 @@ export default function AdminHome() {
     }
   }, [dashboardData]);
 
-  console.log('Dashboard Data:', dashboardData);
+  console.log("Dashboard Data:", dashboardData);
 
   if (isLoading) {
     return <Text style={styles.loading}>Đang tải dữ liệu...</Text>;
@@ -71,7 +78,8 @@ export default function AdminHome() {
         {todayBookings.length > 0 ? (
           todayBookings.map((b) => (
             <Text key={b.restaurantId} style={styles.text}>
-              {b.restaurantName || `Nhà hàng ${b.restaurantId}`}: {b.totalBookings} lượt
+              {b.restaurantName || `Nhà hàng ${b.restaurantId}`}:{" "}
+              {b.totalBookings} lượt
             </Text>
           ))
         ) : (
@@ -85,7 +93,9 @@ export default function AdminHome() {
         {top5Monthly.length > 0 ? (
           <BarChart
             data={{
-              labels: top5Monthly.map((b) => b.restaurantName || `R${b.restaurantId}`),
+              labels: top5Monthly.map(
+                (b) => b.restaurantName || `R${b.restaurantId}`
+              ),
               datasets: [{ data: top5Monthly.map((b) => b.monthBookings) }],
             }}
             width={screenWidth}
@@ -108,7 +118,9 @@ export default function AdminHome() {
         {top5Quarterly.length > 0 ? (
           <BarChart
             data={{
-              labels: top5Quarterly.map((b) => b.restaurantName || `R${b.restaurantId}`),
+              labels: top5Quarterly.map(
+                (b) => b.restaurantName || `R${b.restaurantId}`
+              ),
               datasets: [{ data: top5Quarterly.map((b) => b.quarterBookings) }],
             }}
             width={screenWidth}
