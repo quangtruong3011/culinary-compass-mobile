@@ -1,4 +1,3 @@
-import { Box } from "@/components/ui/box";
 import HomeSearchWithFilters from "./HomeSearchWithFilters";
 
 interface HomeListHeaderProps {
@@ -10,12 +9,10 @@ const HomeListHeader = ({
   onFilterTextChange,
 }: HomeListHeaderProps) => {
   return (
-    <Box>
-      <HomeSearchWithFilters
-        filterText={filterText}
-        onFilterTextChange={onFilterTextChange}
-      />
-    </Box>
+    <HomeSearchWithFilters
+      filterText={filterText}
+      onFilterTextChange={onFilterTextChange}
+    />
   );
 };
 

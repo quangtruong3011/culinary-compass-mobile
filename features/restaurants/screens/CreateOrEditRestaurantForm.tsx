@@ -178,6 +178,7 @@ const CreateOrEditRestaurantForm = () => {
         await update({ id: restaurant?.id as number, body: data }).unwrap();
       } else {
         await create(data).unwrap();
+        reset({});
       }
 
       toast.show({
@@ -736,9 +737,13 @@ const CreateOrEditRestaurantForm = () => {
       <Button
         onPress={handleSubmit(onSubmit)}
         isDisabled={isLoading}
-        className="mt-4"
+        style={{
+          marginTop: 16,
+          backgroundColor: "#FF6F61",
+          borderRadius: 8,
+        }}
       >
-        <ButtonSpinner animating={isLoading} />
+        {isLoading && <ButtonSpinner animating={isLoading} />}
         <ButtonText>Submit</ButtonText>
       </Button>
     </VStack>

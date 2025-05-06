@@ -1,4 +1,4 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { createApi } from "@reduxjs/toolkit/query/react";
 import baseQueryWithReauth from "@/shared/base.api";
 import { CreateOrEditBookingDto } from "../interfaces/create-or-edit-booking.interface";
 import { GetAllBookingForUser } from "../interfaces/get-all-booking-for-user.interface";
@@ -82,9 +82,7 @@ export const bookingApi = createApi({
         method: "PATCH",
         body,
       }),
-      invalidatesTags: (result, error, { id }) => [
-        { type: "UserBooking", id },
-      ],
+      invalidatesTags: (result, error, { id }) => [{ type: "UserBooking", id }],
     }),
 
     updateBookingStatus: builder.mutation<any, { id: number; status: string }>({
@@ -128,9 +126,9 @@ export const bookingApi = createApi({
         return {
           todayBookings: data.todayBookings || [],
           top5MonthlyBookings: data.top5MonthlyBookings || [],
-          top5QuarterlyBookings: data.top5QuarterlyBookings || []
+          top5QuarterlyBookings: data.top5QuarterlyBookings || [],
         };
-      }
+      },
     }),
 
     commentRestaurant: builder.mutation<any, number>({

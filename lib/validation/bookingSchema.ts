@@ -23,4 +23,5 @@ export const bookingSchema = z.object({
   }),
   guests: z.number().min(1, "Please select the number of guests"),
   note: z.string().optional(),
+  isCommented: z.boolean().optional(),
 });

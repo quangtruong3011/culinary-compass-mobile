@@ -142,10 +142,12 @@ const BookingCardForAdmin = ({
             <Icon as={PhoneIcon} size="lg" />
             <Text>{phone}</Text>
           </HStack>
-          <HStack className="p-4 gap-2 items-center">
-            <Icon as={MailIcon} size="lg" />
-            <Text>{email}</Text>
-          </HStack>
+          {email && (
+            <HStack className="p-4 gap-2 items-center">
+              <Icon as={MailIcon} size="lg" />
+              <Text>{email}</Text>
+            </HStack>
+          )}
           <HStack className="p-4 gap-2 items-center">
             <Icon as={ClockIcon} size="lg" />
             <Text>{moment(date).format("DD/MM/YYYY")}</Text>

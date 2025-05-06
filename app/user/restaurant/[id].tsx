@@ -3,7 +3,7 @@ import { Heading } from "@/components/ui/heading";
 import { HStack } from "@/components/ui/hstack";
 import { VStack } from "@/components/ui/vstack";
 import { AppDispatch, RootState } from "@/store/store";
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { Stack } from "expo-router";
 import { ScrollView } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
@@ -15,6 +15,7 @@ import { clearCurrentRestaurant } from "@/features/restaurants/store/restaurant.
 import { useEffect } from "react";
 import { Image } from "expo-image";
 import { FlatList } from "react-native";
+import moment from "moment";
 
 export default function RestaurantDetailScreen() {
   const dispatch = useDispatch<AppDispatch>();
@@ -62,15 +63,25 @@ export default function RestaurantDetailScreen() {
             }}
           >
             <VStack className="items-center" style={{ marginBottom: 16 }}>
-              <Heading size="lg" style={{ marginBottom: 8 }}>
+              <Heading size="xl" style={{ marginBottom: 8 }}>
                 {restaurant?.name}
               </Heading>
-
-              <HStack className="items-center" style={{ marginBottom: 8 }}>
+              <HStack className="items-center">
                 <Ionicons name="location-outline" size={16} color="gray" />
-                <Text className="text-gray-500">{restaurant?.address}</Text>
+                <Text size="md" className="text-gray-500">
+                  {[restaurant?.address, restaurant?.ward, restaurant?.district]
+                    .filter(Boolean)
+                    .join(", ")}
+                </Text>
               </HStack>
             </VStack>
+            <HStack className="items-center">
+              <MaterialIcons name="timer" size={16} color="gray" />
+              <Text className="text-gray-500" style={{ marginLeft: 4 }}>
+                {moment(restaurant?.openingTime).format("HH:mm")} -{" "}
+                {moment(restaurant?.closingTime).format("HH:mm")}
+              </Text>
+            </HStack>
           </Box>
         </Box>
 

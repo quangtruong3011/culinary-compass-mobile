@@ -16,6 +16,9 @@ interface RestaurantCardForUserProps {
   uri: string;
   name: string;
   address: string;
+  ward: string;
+  district: string;
+  province: string;
   openingTime: string;
   closingTime: string;
 }
@@ -27,6 +30,9 @@ const RestaurantCardForUser = ({
   uri,
   name,
   address,
+  ward,
+  district,
+  province,
   openingTime,
   closingTime,
 }: RestaurantCardForUserProps) => {
@@ -70,7 +76,17 @@ const RestaurantCardForUser = ({
 
         <HStack className="items-center" style={{ marginBottom: 4 }}>
           <Ionicons name="location-outline" size={16} color="gray" />
-          <Text className="text-sm text-gray-500 mb-2">{address}</Text>
+          <Text
+            numberOfLines={1}
+            ellipsizeMode="tail"
+            style={{
+              width: "80%", // Adjust width as needed
+            }}
+            size="md"
+            className="text-gray-500"
+          >
+            {[address, ward, district, province].filter(Boolean).join(", ")}
+          </Text>
         </HStack>
 
         <HStack className="items-center">

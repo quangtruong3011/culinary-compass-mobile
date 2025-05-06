@@ -47,10 +47,6 @@ const authSlice = createSlice({
   },
   extraReducers(builder) {
     // Login
-    builder.addMatcher(authApi.endpoints.login.matchPending, (state) => {
-      state.is_loading = true;
-      state.error = null;
-    });
     builder.addMatcher(
       authApi.endpoints.login.matchFulfilled,
       (state, { payload }) => {
@@ -58,22 +54,10 @@ const authSlice = createSlice({
         state.access_token = payload.data.access_token;
         state.refresh_token = payload.data.refresh_token;
         state.is_authenticated = true;
+      }
+    );
 
-        authApi.endpoints.getMe.initiate();
-      }
-    );
-    builder.addMatcher(
-      authApi.endpoints.login.matchRejected,
-      (state, { payload }) => {
-        state.is_loading = false;
-        state.error = (payload as any)?.data?.message || "Login failed";
-      }
-    );
-    // Get User Profile
-    builder.addMatcher(authApi.endpoints.getMe.matchPending, (state) => {
-      state.is_loading = true;
-      state.error = null;
-    });
+    // Get Me
     builder.addMatcher(
       authApi.endpoints.getMe.matchFulfilled,
       (state, { payload }) => {
@@ -82,14 +66,7 @@ const authSlice = createSlice({
         state.user = payload.data;
       }
     );
-    builder.addMatcher(
-      authApi.endpoints.getMe.matchRejected,
-      (state, { payload }) => {
-        state.is_loading = false;
-        state.is_authenticated = false;
-        state.error = (payload as any)?.data?.message || "Failed to fetch user";
-      }
-    );
+
     // Refresh Token
     builder.addMatcher(authApi.endpoints.refreshToken.matchPending, (state) => {
       state.is_loading = true;
@@ -103,8 +80,6 @@ const authSlice = createSlice({
         state.refresh_token = payload.data.refresh_token;
         state.user = payload.data.user;
         state.is_authenticated = true;
-
-        authApi.endpoints.getMe.initiate();
       }
     );
     builder.addMatcher(
@@ -118,11 +93,8 @@ const authSlice = createSlice({
         removeAuthTokens();
       }
     );
+
     // Registration
-    builder.addMatcher(authApi.endpoints.register.matchPending, (state) => {
-      state.is_loading = true;
-      state.error = null;
-    });
     builder.addMatcher(
       authApi.endpoints.register.matchFulfilled,
       (state, { payload }) => {
@@ -134,21 +106,8 @@ const authSlice = createSlice({
         saveAuthTokens(payload.data.access_token, payload.data.refresh_token);
       }
     );
-    builder.addMatcher(
-      authApi.endpoints.register.matchRejected,
-      (state, { payload }) => {
-        state.is_loading = false;
-        state.error = (payload as any)?.data?.message || "Registration failed";
-      }
-    );
+
     // Update User Roles
-    builder.addMatcher(
-      authApi.endpoints.updateUserRoles.matchPending,
-      (state) => {
-        state.is_loading = true;
-        state.error = null;
-      }
-    );
     builder.addMatcher(
       authApi.endpoints.updateUserRoles.matchFulfilled,
       (state, { payload }) => {
@@ -156,18 +115,8 @@ const authSlice = createSlice({
         state.user = payload.data.user;
       }
     );
-    builder.addMatcher(
-      authApi.endpoints.updateUserRoles.matchRejected,
-      (state, { payload }) => {
-        state.is_loading = false;
-        // state.error = payload.error;
-      }
-    );
+
     // Update Profile
-    builder.addMatcher(userApi.endpoints.updateUser.matchPending, (state) => {
-      state.is_loading = true;
-      state.error = null;
-    });
     builder.addMatcher(
       userApi.endpoints.updateUser.matchFulfilled,
       (state, { payload }) => {

@@ -8,13 +8,13 @@ import {
   FormControlLabelText,
 } from "@/components/ui/form-control";
 import { HStack } from "@/components/ui/hstack";
-import { Input, InputField, InputSlot } from "@/components/ui/input";
+import { Input, InputField } from "@/components/ui/input";
 import { VStack } from "@/components/ui/vstack";
 import { RegisterFormData, registerSchema } from "@/lib/validation/authSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Link } from "expo-router";
 import { Controller, useForm } from "react-hook-form";
-import { Text } from "react-native";
+import { Text, StyleSheet } from "react-native";
 import colors from "tailwindcss/colors";
 
 export const RegisterForm = ({
@@ -33,7 +33,10 @@ export const RegisterForm = ({
   });
 
   return (
-    <VStack className="w-full max-w-md px-4">
+    <VStack space="md" style={styles.form}>
+      <Text style={styles.title}>Create Account</Text>
+      <Text style={styles.subtitle}>Fill in your details to register</Text>
+
       <Controller
         name="email"
         control={control}
@@ -44,21 +47,25 @@ export const RegisterForm = ({
             isDisabled={isLoading}
           >
             <FormControlLabel>
-              <FormControlLabelText>Email</FormControlLabelText>
+              <FormControlLabelText style={styles.label}>
+                Email
+              </FormControlLabelText>
             </FormControlLabel>
-            <Input className="my-1">
+            <Input style={styles.input}>
               <InputField
                 type="text"
                 placeholder="example@gmail.com"
+                placeholderTextColor="#999"
                 value={value}
                 onBlur={onBlur}
                 onChangeText={onChange}
+                style={styles.inputField}
               />
             </Input>
             <FormControlError>
               {errors.email?.message && (
-                <FormControlErrorText>
-                  <Text style={{ color: "red" }}>{errors.email.message}</Text>
+                <FormControlErrorText style={styles.errorText}>
+                  {errors.email.message}
                 </FormControlErrorText>
               )}
             </FormControlError>
@@ -76,23 +83,25 @@ export const RegisterForm = ({
             isDisabled={isLoading}
           >
             <FormControlLabel>
-              <FormControlLabelText>Password</FormControlLabelText>
+              <FormControlLabelText style={styles.label}>
+                Password
+              </FormControlLabelText>
             </FormControlLabel>
-            <Input className="my-1">
+            <Input style={styles.input}>
               <InputField
                 type="password"
-                placeholder="********"
+                placeholder="••••••••"
+                placeholderTextColor="#999"
                 value={value}
                 onBlur={onBlur}
                 onChangeText={onChange}
+                style={styles.inputField}
               />
             </Input>
             <FormControlError>
               {errors.password?.message && (
-                <FormControlErrorText>
-                  <Text style={{ color: "red" }}>
-                    {errors.password.message}
-                  </Text>
+                <FormControlErrorText style={styles.errorText}>
+                  {errors.password.message}
                 </FormControlErrorText>
               )}
             </FormControlError>
@@ -110,23 +119,25 @@ export const RegisterForm = ({
             isDisabled={isLoading}
           >
             <FormControlLabel>
-              <FormControlLabelText>Confirm Password</FormControlLabelText>
+              <FormControlLabelText style={styles.label}>
+                Confirm Password
+              </FormControlLabelText>
             </FormControlLabel>
-            <Input className="my-1">
+            <Input style={styles.input}>
               <InputField
                 type="password"
-                placeholder="********"
+                placeholder="••••••••"
+                placeholderTextColor="#999"
                 value={value}
                 onBlur={onBlur}
                 onChangeText={onChange}
+                style={styles.inputField}
               />
             </Input>
             <FormControlError>
               {errors.confirmPassword?.message && (
-                <FormControlErrorText>
-                  <Text style={{ color: "red" }}>
-                    {errors.confirmPassword.message}
-                  </Text>
+                <FormControlErrorText style={styles.errorText}>
+                  {errors.confirmPassword.message}
                 </FormControlErrorText>
               )}
             </FormControlError>
@@ -134,18 +145,95 @@ export const RegisterForm = ({
         )}
       />
 
-      <Button size="lg" onPress={handleSubmit(onSubmit)} disabled={isLoading}>
-        <ButtonSpinner color={colors.gray[400]} animating={isLoading} />
-        <ButtonText>{isLoading ? "Loading..." : "Register"}</ButtonText>
+      <Button
+        size="lg"
+        onPress={handleSubmit(onSubmit)}
+        disabled={isLoading}
+        style={styles.registerButton}
+      >
+        {isLoading && <ButtonSpinner color={colors.white} />}
+        <ButtonText style={styles.registerButtonText}>
+          {isLoading ? "Creating account..." : "Register"}
+        </ButtonText>
       </Button>
 
-      <Divider className="my-6" />
+      <Divider style={styles.divider} />
 
-      <HStack className="justify-center">
-        <Link href="/(auth)/login" className="text-sm text-blue-500">
-          <Text>Already have an account? Login</Text>
+      <HStack style={styles.loginContainer}>
+        <Text style={styles.loginText}>Already have an account? </Text>
+        <Link href="/(auth)/login" style={styles.loginLink}>
+          <Text style={styles.loginLinkText}>Login</Text>
         </Link>
       </HStack>
     </VStack>
   );
 };
+
+const styles = StyleSheet.create({
+  form: {
+    width: "100%",
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: "bold",
+    color: "#333",
+    textAlign: "center",
+    marginBottom: 8,
+  },
+  subtitle: {
+    fontSize: 16,
+    color: "#666",
+    textAlign: "center",
+    marginBottom: 24,
+  },
+  label: {
+    color: "#444",
+    marginBottom: 4,
+  },
+  input: {
+    backgroundColor: "rgba(255, 255, 255, 0.8)",
+    borderWidth: 1,
+    borderColor: "#ddd",
+    borderRadius: 8,
+    marginBottom: 8,
+  },
+  inputField: {
+    color: "#333",
+    padding: 12,
+  },
+  errorText: {
+    color: "#ff3b30",
+    fontSize: 14,
+    marginTop: 4,
+  },
+  registerButton: {
+    backgroundColor: "#007AFF",
+    borderRadius: 8,
+    height: 48,
+    marginTop: 16,
+  },
+  registerButtonText: {
+    color: "white",
+    fontWeight: "600",
+    fontSize: 16,
+  },
+  divider: {
+    marginVertical: 24,
+    backgroundColor: "#ddd",
+  },
+  loginContainer: {
+    justifyContent: "center",
+  },
+  loginText: {
+    color: "#666",
+    fontSize: 14,
+  },
+  loginLink: {
+    marginLeft: 4,
+  },
+  loginLinkText: {
+    color: "#007AFF",
+    fontSize: 14,
+    fontWeight: "500",
+  },
+});

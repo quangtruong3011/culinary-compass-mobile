@@ -23,7 +23,6 @@ const userSlice = createSlice({
   },
   extraReducers: (builder) => {
     // Update user
-    
   },
 });
 

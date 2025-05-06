@@ -30,16 +30,16 @@ const HomeSearchWithFilters = ({
   ];
 
   useEffect(() => {
-    const typingSpeed = 100; // tốc độ gõ (ms)
-    const deletingSpeed = 50; // tốc độ xóa (ms)
-    const pauseBetween = 2000; // thời gian dừng giữa các placeholder (ms)
+    const typingSpeed = 100; // typing speed (ms)
+    const deletingSpeed = 50; // deleting speed (ms)
+    const pauseBetween = 2000; // pause between placeholders (ms)
 
-    let timeout: NodeJS.Timeout;
+    let timeout: number; // Changed from NodeJS.Timeout to number
     const currentPhrase = placeholders[currentPlaceholderIndex];
 
     if (currentIndex <= currentPhrase.length) {
-      // Hiệu ứng gõ chữ
-      timeout = setTimeout(() => {
+      // Typing effect
+      timeout = window.setTimeout(() => {
         setDisplayedPlaceholder(currentPhrase.substring(0, currentIndex));
         setCurrentIndex(currentIndex + 1);
       }, typingSpeed);
@@ -47,14 +47,14 @@ const HomeSearchWithFilters = ({
       currentIndex >
       currentPhrase.length + pauseBetween / typingSpeed
     ) {
-      // Hiệu ứng xóa chữ
-      timeout = setTimeout(() => {
+      // Deleting effect
+      timeout = window.setTimeout(() => {
         if (displayedPlaceholder.length > 0) {
           setDisplayedPlaceholder(
             displayedPlaceholder.substring(0, displayedPlaceholder.length - 1)
           );
         } else {
-          // Chuyển sang placeholder tiếp theo
+          // Move to next placeholder
           setCurrentPlaceholderIndex(
             (currentPlaceholderIndex + 1) % placeholders.length
           );
@@ -62,13 +62,13 @@ const HomeSearchWithFilters = ({
         }
       }, deletingSpeed);
     } else {
-      // Dừng giữa các placeholder
-      timeout = setTimeout(() => {
+      // Pause between placeholders
+      timeout = window.setTimeout(() => {
         setCurrentIndex(currentIndex + 1);
       }, typingSpeed);
     }
 
-    return () => clearTimeout(timeout);
+    return () => window.clearTimeout(timeout);
   }, [currentIndex, currentPlaceholderIndex, displayedPlaceholder]);
 
   return (

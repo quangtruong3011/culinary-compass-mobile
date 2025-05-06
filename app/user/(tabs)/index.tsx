@@ -6,6 +6,7 @@ import moment from "moment";
 import HomeListHeader from "@/features/home/HomeListHeader";
 import HomeListEmpty from "@/features/home/HomeListEmty";
 import { useCallback, useEffect, useState } from "react";
+import { useFocusEffect } from "expo-router";
 
 export default function UserHome() {
   const [filterText, setFilterText] = useState("");
@@ -13,12 +14,18 @@ export default function UserHome() {
   const [page, setPage] = useState(PAGE);
   const [isManualRefreshing, setIsManualRefreshing] = useState(false);
 
-  const { data, isLoading, isError, isFetching, refetch } =
+  const { data, isLoading, isFetching, refetch } =
     useFindAllRestaurantsForUserQuery({
-      page: PAGE,
+      page: page,
       limit: PAGE_SIZE,
       filterText: debouncedFilterText.trim(),
     });
+
+  useFocusEffect(
+    useCallback(() => {
+      refetch();
+    }, [refetch])
+  );
 
   const totalPages = data?.data?.totalPages || 0;
   const hasMoreData = page < totalPages;
@@ -76,6 +83,9 @@ export default function UserHome() {
           uri={item.imageUrl ?? ""}
           name={item.name ?? ""}
           address={item.address ?? ""}
+          ward={item.ward ?? ""}
+          district={item.district ?? ""}
+          province={item.province ?? ""}
           openingTime={moment(item.openingTime).format("HH:mm")}
           closingTime={moment(item.closingTime).format("HH:mm")}
         />

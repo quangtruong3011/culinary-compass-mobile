@@ -6,7 +6,12 @@ import { BarChart } from "react-native-chart-kit";
 import { useGetDashboardDataQuery } from "@/features/bookings/api/booking.api";
 
 export default function AdminHome() {
-  const { refetch ,data: dashboardData, isLoading, error } = useGetDashboardDataQuery({});
+  const {
+    refetch,
+    data: dashboardData,
+    isLoading,
+    error,
+  } = useGetDashboardDataQuery({});
 
   interface Booking {
     restaurantId: number;
@@ -17,7 +22,7 @@ export default function AdminHome() {
   const [todayBookings, setTodayBookings] = useState<Booking[]>([]);
   const [top5Monthly, setTop5Monthly] = useState<Booking[]>([]);
   const [top5Quarterly, setTop5Quarterly] = useState<Booking[]>([]);
-  //loading state
+
   useFocusEffect(
     useCallback(() => {
       refetch();
@@ -63,7 +68,8 @@ export default function AdminHome() {
         {todayBookings.length > 0 ? (
           todayBookings.map((b) => (
             <Text key={b.restaurantId} style={styles.text}>
-              {b.restaurantName || `Nhà hàng ${b.restaurantId}`}: {b.totalBookings} lượt
+              {b.restaurantName || `Nhà hàng ${b.restaurantId}`}:{" "}
+              {b.totalBookings} lượt
             </Text>
           ))
         ) : (
@@ -77,7 +83,9 @@ export default function AdminHome() {
         {top5Monthly.length > 0 ? (
           <BarChart
             data={{
-              labels: top5Monthly.map((b) => b.restaurantName || `R${b.restaurantId}`),
+              labels: top5Monthly.map(
+                (b) => b.restaurantName || `R${b.restaurantId}`
+              ),
               datasets: [{ data: top5Monthly.map((b) => b.totalBookings) }],
             }}
             width={screenWidth}
@@ -100,7 +108,9 @@ export default function AdminHome() {
         {top5Quarterly.length > 0 ? (
           <BarChart
             data={{
-              labels: top5Quarterly.map((b) => b.restaurantName || `R${b.restaurantId}`),
+              labels: top5Quarterly.map(
+                (b) => b.restaurantName || `R${b.restaurantId}`
+              ),
               datasets: [{ data: top5Quarterly.map((b) => b.totalBookings) }],
             }}
             width={screenWidth}

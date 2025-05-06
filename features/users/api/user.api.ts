@@ -1,16 +1,30 @@
-import { createApi } from "@reduxjs/toolkit/query/react";
+import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import baseQueryWithReauth from "@/shared/base.api";
 import { GetUserDto } from "../interfaces/get-user.interface";
 import { CreateOrEditUserDto } from "../interfaces/create-or-edit-user.interface";
-import { SingleResponse } from "@/shared/api-response";
-import baseQueryWithReauth from "@/shared/base.api";
+import { RootState } from "@/store/store";
+import { BASE_URL } from "@/constants/constants";
 
 export const userApi = createApi({
   reducerPath: "userApi",
-  baseQuery: baseQueryWithReauth,
+  // baseQuery: baseQueryWithReauth,
+  baseQuery: fetchBaseQuery({
+    baseUrl: BASE_URL,
+    prepareHeaders: (headers, { getState }) => {
+      const token = (getState() as RootState).auth.access_token;
+      if (token) {
+        headers.set("Authorization", `Bearer ${token}`);
+      }
+      return headers;
+    },
+  }),
   tagTypes: ["User"],
   endpoints: (builder) => ({
-    findOneUser: builder.query({
-      query: (id) => `/users/${id}`,
+    findOneUser: builder.query<GetUserDto, number>({
+      query: (id) => ({
+        url: `/users/${id}`,
+        method: "GET",
+      }),
     }),
     updateUser: builder.mutation<
       GetUserDto,
@@ -21,9 +35,9 @@ export const userApi = createApi({
         method: "PATCH",
         body,
       }),
-      invalidatesTags: ["User"],
+      invalidatesTags: (result, error, { id }) => [{ type: "User", id }],
     }),
   }),
 });
 
-export const { useUpdateUserMutation } = userApi;
+export const { useFindOneUserQuery, useUpdateUserMutation } = userApi;

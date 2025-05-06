@@ -15,7 +15,7 @@ const RestaurantListHeader = ({
 }: RestaurantListHeaderProps) => {
   const { control } = useForm({
     defaultValues: {
-      filterText: "",
+      filterText: filterText,
     },
   });
 
@@ -46,12 +46,13 @@ const RestaurantListHeader = ({
         <Controller
           control={control}
           name="filterText"
-          render={({ field }) => (
+          defaultValue={filterText}
+          render={({ field: { onChange, value } }) => (
             <TextInput
               placeholder="Search restaurants..."
-              value={field.value}
+              value={value}
               onChangeText={(text) => {
-                field.onChange(text);
+                onChange(text);
                 onFilterTextChange(text);
               }}
               style={{

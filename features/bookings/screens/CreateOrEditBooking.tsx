@@ -31,7 +31,7 @@ import {
 import { useRouter } from "expo-router";
 import { BOOKING_STATUS } from "@/constants/constants";
 import { setCurrentBooking } from "../store/booking.slice";
-
+import { Textarea, TextareaInput } from "@/components/ui/textarea";
 
 const CreateOrEditBooking = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -113,7 +113,7 @@ const CreateOrEditBooking = () => {
         const { data: updated } = await dispatch(
           bookingApi.endpoints.findOneBookingForUser.initiate(booking.id)
         );
-      
+
         if (updated) {
           dispatch(setCurrentBooking(updated.data));
         }
@@ -149,7 +149,6 @@ const CreateOrEditBooking = () => {
         });
         reset();
       }
-
     } catch (error) {}
   };
 
@@ -420,21 +419,35 @@ const CreateOrEditBooking = () => {
         name="note"
         control={control}
         render={({ field: { onChange, onBlur, value } }) => (
-          <FormControl isInvalid={!!errors.note} isRequired={false} isDisabled={isLoading}>
+          <FormControl
+            isInvalid={!!errors.note}
+            isRequired={false}
+            isDisabled={isLoading}
+            style={{
+              marginBottom: 10,
+            }}
+          >
             <FormControlLabel>
               <FormControlLabelText>Note</FormControlLabelText>
             </FormControlLabel>
-            <Input className="my-1">
-              <InputField
-                type="text"
+            <Textarea
+              isReadOnly={false}
+              isDisabled={isLoading}
+              isInvalid={!!errors.note}
+            >
+              <TextareaInput
                 onChangeText={onChange}
                 onBlur={onBlur}
                 value={value}
+                numberOfLines={5}
+                maxLength={256}
               />
-            </Input>
+            </Textarea>
             {errors.note && (
               <FormControlError>
-                <FormControlErrorText>{errors.note.message}</FormControlErrorText>
+                <FormControlErrorText>
+                  {errors.note.message}
+                </FormControlErrorText>
               </FormControlError>
             )}
           </FormControl>

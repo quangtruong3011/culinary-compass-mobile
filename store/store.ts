@@ -10,6 +10,8 @@ import { tableApi } from "@/features/tables/api/table.api";
 import { bookingApi } from "@/features/bookings/api/booking.api";
 import { bookingReducer } from "@/features/bookings/store/booking.slice";
 import { commentApi } from "@/features/comments/api/comment.api";
+import { tableReducer } from "@/features/tables/store/table.slice";
+import { userReducer } from "@/features/users/store/user.slice";
 
 const persistConfig = {
   key: "root",
@@ -18,13 +20,14 @@ const persistConfig = {
 };
 
 const rootReducer = combineReducers({
-  auth: authReducer,
   [authApi.reducerPath]: authApi.reducer,
+  auth: authReducer,
   [userApi.reducerPath]: userApi.reducer,
-  user: userApi.reducer,
+  // user: userReducer,
   [restaurantApi.reducerPath]: restaurantApi.reducer,
   restaurant: restaurantReducer,
   [tableApi.reducerPath]: tableApi.reducer,
+  table: tableReducer,
   [bookingApi.reducerPath]: bookingApi.reducer,
   booking: bookingReducer,
   [commentApi.reducerPath]: commentApi.reducer,

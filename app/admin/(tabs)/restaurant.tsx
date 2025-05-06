@@ -6,42 +6,50 @@ import moment from "moment";
 import { PAGE, PAGE_SIZE } from "@/constants/constants";
 import RestaurantListHeader from "@/features/restaurants/screens/RestaurantListHeader";
 import RestaurantListEmpty from "@/features/restaurants/screens/RestaurantListEmpty";
+import { useFocusEffect } from "expo-router";
 
 export default function RestaurantAdminScreen() {
-  const [page, setPage] = useState(PAGE);
   const [filterText, setFilterText] = useState("");
   const [debouncedFilterText, setDebouncedFilterText] = useState("");
+  const [page, setPage] = useState(PAGE);
   const [isManualRefreshing, setIsManualRefreshing] = useState(false);
 
-  const { data, isLoading, isError, refetch, isFetching } =
+  const { data, isLoading, isFetching, refetch } =
     useFindAllRestaurantsForAdminQuery({
       page: page,
       limit: PAGE_SIZE,
-      filterText: debouncedFilterText.trim(),
+      filterText: debouncedFilterText,
     });
+
+  useFocusEffect(
+    useCallback(() => {
+      refetch();
+    }, [refetch])
+  );
 
   const totalPages = data?.data?.totalPages || 0;
   const hasMoreData = page < totalPages;
-
-    // Xử lý debounce cho filterText
-    useEffect(() => {
-      const timer = setTimeout(() => {
-        setDebouncedFilterText(filterText);
-        setPage(1); // Reset về trang đầu khi tìm kiếm
-      }, 300); // 300ms debounce
-      return () => clearTimeout(timer);
-    }, [filterText]);
 
   const handleFilterTextChange = (text: string) => {
     setFilterText(text);
   };
 
-  const handleRefresh = useCallback(() => {
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedFilterText(filterText);
+      setPage(1);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [filterText]);
+
+  const handleRefresh = useCallback(async () => {
     setIsManualRefreshing(true);
     setPage(1);
-    refetch().finally(() => {
+    try {
+      await refetch();
+    } finally {
       setIsManualRefreshing(false);
-    });
+    }
   }, [refetch]);
 
   const handleLoadMore = useCallback(() => {

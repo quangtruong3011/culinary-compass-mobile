@@ -20,9 +20,6 @@ export const authApi = createApi({
         method: "POST",
         body,
       }),
-      transformResponse: (response: LoginResponse) => {
-        return response;
-      },
     }),
     register: builder.mutation<RegisterResponse, RegisterFormData>({
       query: (body) => ({
@@ -30,11 +27,8 @@ export const authApi = createApi({
         method: "POST",
         body,
       }),
-      transformResponse: (response: RegisterResponse) => {
-        return response;
-      },
     }),
-    getMe: builder.query<GetUserDto, void>({
+    getMe: builder.mutation<GetUserDto, void>({
       query: () => ({
         url: "/auth/me",
         method: "POST",
@@ -60,7 +54,7 @@ export const authApi = createApi({
 export const {
   useLoginMutation,
   useRegisterMutation,
-  useGetMeQuery,
+  useGetMeMutation,
   useRefreshTokenMutation,
   useUpdateUserRolesMutation,
 } = authApi;
