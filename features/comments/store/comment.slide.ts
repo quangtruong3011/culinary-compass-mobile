@@ -31,9 +31,23 @@ const commentSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder.addMatcher(
-      commentApi.endpoints.findAllCommentsForRestaurant.matchFulfilled,
+      commentApi.endpoints.findAllCommentsForUser.matchFulfilled,
       (state, { payload }) => {
         state.comments = payload.data.results;
+      }
+    );
+
+    builder.addMatcher(
+      commentApi.endpoints.findOneCommentByBookingId.matchFulfilled,
+      (state, { payload }) => {
+        state.currentComment = payload.data;
+      }
+    );
+
+    builder.addMatcher(
+      commentApi.endpoints.updateComment.matchFulfilled,
+      (state, { payload }) => {
+        state.currentComment = payload.data;
       }
     );
   },

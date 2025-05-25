@@ -19,7 +19,6 @@ import { BookingStatus } from "../types/booking-status.type";
 
 interface BookingCardForUserProps {
   id: number;
-  restaurantId: number;
   date: Date;
   startTime: Date;
   endTime: Date;
@@ -30,7 +29,6 @@ interface BookingCardForUserProps {
 
 const BookingCardForUser = ({
   id,
-  restaurantId,
   date,
   startTime,
   endTime,
@@ -129,13 +127,24 @@ const BookingCardForUser = ({
 
       if (data) {
         dispatch(setCurrentBooking(data.data));
-        router.push(`/user/booking/${id}/comment`);
+        router.push(`/user/booking/${id}/createOrEditComment`);
       }
     }
     catch (error) {
       console.error("Error fetching booking data:", error);
     }
   };
+
+  const handleEditCommentPress = async () => {
+    const { data } = await dispatch(
+      bookingApi.endpoints.findOneBookingForUser.initiate(id)
+    );
+
+    if (data) {
+      dispatch(setCurrentBooking(data.data));
+      router.push(`/user/booking/${id}/createOrEditComment`);
+    } 
+  }
 
 
   return (
@@ -182,6 +191,11 @@ const BookingCardForUser = ({
           {status === "completed" && isCommented === false && (
             <Button onPress={handleCommentPress}>
               <ButtonText>Comment</ButtonText>
+            </Button>
+          )}
+          {isCommented === true && (
+            <Button onPress={handleEditCommentPress}>
+              <ButtonText>Commented</ButtonText>
             </Button>
           )}
         </HStack>

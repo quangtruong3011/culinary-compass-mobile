@@ -34,6 +34,7 @@ export const bookingApi = createApi({
           limit: options.limit,
           filterText: options.filterText,
           restaurantId: options.restaurantId,
+          status: options.status,
         },
       }),
       providesTags: ["AdminBooking"],

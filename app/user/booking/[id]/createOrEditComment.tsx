@@ -1,4 +1,4 @@
-import CreateComment from "@/features/comments/screens/CreateComment";
+import CreateOrEditComment from "@/features/comments/screens/CreateOrEditComment";
 import { Stack } from "expo-router";
 import { ScrollView } from "react-native";
 import { Box } from "@/components/ui/box";
@@ -15,21 +15,26 @@ import { Ionicons } from "@expo/vector-icons";
 import { StyleSheet } from "react-native";
 import { clearCurrentRestaurant } from "@/features/restaurants/store/restaurant.slice";
 import { useFindOneRestaurantForUserQuery } from "@/features/restaurants/api/restaurant.api";
+import { AppDispatch, RootState } from "@/store/store";
+import { clearCurrentComment } from "@/features/comments/store/comment.slide";
 
-export default function CommentScreen() {
+export default function CommenDetail() {
   const dispatch = useDispatch<AppDispatch>();
+  const commentDetail = useSelector(
+    (state: any) => state.comment.currentComment
+  );
+
   const booking = useSelector(
-    (state: RootState) => state?.booking?.currentBooking
+    (state: RootState) => state.booking.currentBooking
   );
-  console.log("booking", booking);
+  
   const { data: restaurant } = useFindOneRestaurantForUserQuery(
-    booking?.restaurantId
+    booking?.restaurantId ?? 0,
   );
-  console.log("restaurant", restaurant);
 
   useEffect(() => {
     return () => {
-      dispatch(clearCurrentRestaurant());
+      dispatch(clearCurrentComment());
     };
   }, [dispatch]);
 
@@ -98,7 +103,7 @@ export default function CommentScreen() {
           >
             <Heading size="md">Comment</Heading>
           </HStack>
-          <CreateComment />
+          <CreateOrEditComment />
         </Box>
       </ScrollView>
     </>

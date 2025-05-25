@@ -12,6 +12,7 @@ import { bookingReducer } from "@/features/bookings/store/booking.slice";
 import { commentApi } from "@/features/comments/api/comment.api";
 import { tableReducer } from "@/features/tables/store/table.slice";
 import { userReducer } from "@/features/users/store/user.slice";
+import { commentReducer } from "@/features/comments/store/comment.slide";
 
 const persistConfig = {
   key: "root",
@@ -31,6 +32,7 @@ const rootReducer = combineReducers({
   [bookingApi.reducerPath]: bookingApi.reducer,
   booking: bookingReducer,
   [commentApi.reducerPath]: commentApi.reducer,
+  comment: commentReducer,
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
@@ -48,7 +50,7 @@ export const store = configureStore({
       restaurantApi.middleware,
       tableApi.middleware,
       bookingApi.middleware,
-      commentApi.middleware
+      commentApi.middleware,
     ),
 
   // devTools: process.env.NODE_ENV !== "production",
